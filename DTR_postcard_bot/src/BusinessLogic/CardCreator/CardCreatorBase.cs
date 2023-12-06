@@ -20,16 +20,30 @@ public abstract class CardCreatorBase
     
     public async Task Execute(CallbackQuery query)
     { 
+        _logger.LogInformation("Processing {UserId} query {QueryType}", query.From.Id, query.Data);
+        
         var card = await _cardOperator.FetchCard(query.From.Id);
         if(card is null) return;
 
-        await Handle(card);
+        await ProcessTask(card, query);
         
-       if (NextTask is not null)
-       {
-           await NextTask.Execute(query);
-       }
+        if (NextTask is not null)
+        {
+            await ProcessTask(card, query);
+        }
     }
 
-    protected abstract Task Handle(Card card);
+    private async Task ProcessTask(Card card, CallbackQuery query)
+    {
+        if (query is not null && query.Data.StartsWith("/add"))
+        {
+            await Handle(card, query);
+        }
+        else
+        {
+            await Handle(card, null);
+        }
+    }
+
+    protected abstract Task Handle(Card card, CallbackQuery? query);
 }

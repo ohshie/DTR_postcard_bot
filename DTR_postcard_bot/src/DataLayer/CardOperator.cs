@@ -34,7 +34,7 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
                 UserId = userId,
                 LastBotMessageId = lastMessageId,
                 CardCreationInProcess = true,
-                Step = 1
+                Step = 0
             };
             
             await repository.Add(card);
@@ -74,6 +74,19 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
         catch (Exception e)
         {
             logger.LogError("Error removing entry from db. ChatId: {ChatId}, error {Exception}", card.UserId, e);
+            throw;
+        }
+    }
+
+    public async Task UpdateCard(Card card)
+    {
+        try
+        {
+            await repository.Update(card);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Error updating entry in db. ChatId: {ChatId}, error {Exception}", card.UserId, e);
             throw;
         }
     }

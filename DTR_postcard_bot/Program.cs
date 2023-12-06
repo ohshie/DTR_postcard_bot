@@ -1,10 +1,11 @@
 ﻿using DTR_postcard_bot.AssetManager;
 using DTR_postcard_bot.BotClient;
 using DTR_postcard_bot.BotClient.Keyboards;
+using DTR_postcard_bot.BotClient.Keyboards.Buttons;
 using DTR_postcard_bot.BusinessLogic.CardCreator;
+using DTR_postcard_bot.BusinessLogic.CardCreator.ElementsHandler;
 using DTR_postcard_bot.BusinessLogic.ImageProcessor;
 using DTR_postcard_bot.BusinessLogic.TextContent;
-using DTR_postcard_bot.ChannelBase;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.DbContext;
 using DTR_postcard_bot.DataLayer.Models;
@@ -25,7 +26,7 @@ class Program
         {
             var dbContext = host.Services.GetRequiredService<PostcardDbContext>();
             await dbContext.Database.EnsureCreatedAsync();
-
+            
             var assetLoader = host.Services.GetRequiredService<AssetLoader>();
             await assetLoader.Load();
             
@@ -38,7 +39,7 @@ class Program
 
     private static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-            .UseSerilog((context, configuration) =>
+            .UseSerilog((_, configuration) =>
             {
                 configuration
                     .MinimumLevel.Warning()
@@ -54,8 +55,6 @@ class Program
             var token = context.Configuration.GetSection("BotToken").GetValue<string>("BotToken");
             return new TelegramBotClient(token!);
         });
-
-        collection.AddSingleton<ChannelMapper>();
         
         // Asset Manager
         collection.AddSingleton<AssetLoader>();
@@ -75,11 +74,17 @@ class Program
         collection.AddTransient<BotClient>();
         collection.AddTransient<BotMessenger>();
 
+        collection.AddTransient<ButtonCreator>();
         collection.AddTransient<GreetingsKeyboard>();
-        collection.AddTransient<BgKeyboard>();
+        collection.AddTransient<AssetChoiceKeyboard>();
         
         collection.AddTransient<BotGreetMessage>();
         collection.AddTransient<CallbackFactory>();
+        
+        // adding stuff to card
+        collection.AddTransient<AddElementToCard>();
+        
+        collection.AddTransient<AddingElementHandler>();
 
         // Card creation
         collection.AddTransient<StartCardCreation>();

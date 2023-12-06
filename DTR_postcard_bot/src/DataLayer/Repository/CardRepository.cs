@@ -11,9 +11,9 @@ public class CardRepository(PostcardDbContext dbContext) : IRepository<Card>
         return await dbContext.CardCreationTables.FirstOrDefaultAsync(c => c.UserId == id);
     }
 
-    public async Task<IEnumerable<Card>> GetAll(long id)
+    public async Task<IEnumerable<Card>> GetAll(string id)
     {
-        return dbContext.CardCreationTables.Where(c => c.UserId == id).ToList();
+        return dbContext.CardCreationTables.Where(c => c.UserId.ToString() == id).ToList();
     }
 
     public async Task Add(Card id)

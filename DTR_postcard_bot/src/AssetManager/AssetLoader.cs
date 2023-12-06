@@ -1,7 +1,7 @@
-using DTR_postcard_bot.ChannelBase;
 using DTR_postcard_bot.DataLayer.Models;
 using DTR_postcard_bot.DataLayer.Repository;
 using Microsoft.Extensions.Configuration;
+using File = System.IO.File;
 
 namespace DTR_postcard_bot.AssetManager;
 
@@ -10,28 +10,53 @@ public class AssetLoader(AssetOperator assetOperator,
 {
     public async Task Load()
     {
-        var currentAssets = await assetOperator.GetAllAssets();
+        var currentAssetsInDb = await assetOperator.GetAllAssets();
+        var assetsInFolders = await InitializeAssets();
 
-        if (!currentAssets.Any()) await InitializeAssets();
+        if (!currentAssetsInDb.Any())
+        {
+            await assetOperator.AddBatchAssets(assetsInFolders);
+        }
+        else
+        {
+            List<Asset> assetsToBeAdded = CompareAssets(currentAssetsInDb, assetsInFolders);
+            await assetOperator.AddBatchAssets(assetsToBeAdded);
+        }
     }
 
-    private async Task InitializeAssets()
+    private async Task<List<Asset>> InitializeAssets()
     {
         List<Asset> assets = new();
         
         foreach (var section in configuration.GetSection("AssetPaths").GetChildren())
         {
-            var asset = new Asset()
+            var typePath = PathBuilder(section.Value!);
+            var filesPaths = Directory.EnumerateFiles(typePath).ToArray();
+            foreach (var file in filesPaths)
             {
-                Channel = configuration.GetSection("ChannelTag").Value!,
-                Type = section.Value!,
-                FilePath = PathBuilder(section.Value!),
-            };
+                var asset = new Asset()
+                {
+                    Channel = configuration.GetSection("ChannelTag").Value!,
+                    Type = section.Value!,
+                    FilePath = file
+                };
             
-            assets.Add(asset);
+                assets.Add(asset);
+            }
         }
 
-        await assetOperator.AddBatchAssets(assets);
+        return assets;
+    }
+
+    private List<Asset> CompareAssets(List<Asset> assetsInDb, List<Asset> assetsInFolders)
+    {
+        List<Asset> assetsToBeAdded = assetsInFolders.Where(currentAsset => !assetsInDb
+                .Any(a => a.FilePath == currentAsset.FilePath
+                && a.Channel == currentAsset.Channel
+                && a.Type == currentAsset.Type))
+            .ToList();
+
+        return assetsToBeAdded;
     }
 
     private string PathBuilder(string assetType)
@@ -39,7 +64,8 @@ public class AssetLoader(AssetOperator assetOperator,
         string[] filePaths =
         {
             AppDomain.CurrentDomain.BaseDirectory,
-            assetType
+            "assets",
+            assetType,
         };
 
         return Path.Combine(filePaths);

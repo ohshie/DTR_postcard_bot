@@ -5,4 +5,5 @@ public interface ITextContent
     public string GreetingsMessage();
     public string SelectBgMessage();
     public string ResetMessage();
+    public string AddedSomething(string assetType);
 }

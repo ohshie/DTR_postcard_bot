@@ -1,14 +1,17 @@
+using DTR_postcard_bot.BotClient;
 using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BusinessLogic.TextContent;
 using DTR_postcard_bot.DataLayer;
+using Microsoft.Extensions.Configuration;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator;
 
-public class StartCardCreation(ILogger<StartCardCreation> logger, 
-    ITelegramBotClient botClient,
+public class StartCardCreation(ILogger<StartCardCreation> logger,
     CardOperator cardOperator,
     ITextContent textContent,
-    BgKeyboard bgKeyboard)
+    AssetChoiceKeyboard assetChoiceKeyboard,
+    BotMessenger botMessenger,
+    IConfiguration configuration)
 {
     public async Task Handle(CallbackQuery query)
     {
@@ -18,8 +21,11 @@ public class StartCardCreation(ILogger<StartCardCreation> logger,
 
         await cardOperator.RegisterNewCard(query.From.Id, query.Message.MessageId);
 
-        await botClient.SendTextMessageAsync(chatId: query.From.Id, 
+        await botMessenger.UpdateMessageAsync(chatId: query.From.Id, messageId: query.Message.MessageId,
             text: textContent.SelectBgMessage(),
-            replyMarkup: await bgKeyboard.CreateKeyboard());
+            keyboardMarkup: await assetChoiceKeyboard.CreateKeyboard(configuration
+                .GetSection("AssetPaths")
+                .GetChildren()
+                .First().Value!));
     }
 }

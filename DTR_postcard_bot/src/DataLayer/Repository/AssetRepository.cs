@@ -11,9 +11,10 @@ public class AssetRepository(PostcardDbContext dbContext) : IRepository<Asset>
         return await dbContext.Assets.FirstOrDefaultAsync(c => c.Id == id);
     }
     
-    public async Task<IEnumerable<Asset>> GetAll(long id)
+    public async Task<IEnumerable<Asset>> GetAll(string id)
     {
-        return dbContext.Assets.Where(a => a.Id == id);
+        var assets = await dbContext.Assets.Where(a => a.Channel == id).ToListAsync();
+        return assets;
     }
 
     public async Task Add(Asset id)

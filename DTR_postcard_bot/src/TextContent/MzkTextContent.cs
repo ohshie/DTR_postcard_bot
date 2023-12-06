@@ -15,6 +15,12 @@ public class MzkTextContent : ITextContent
                " Выбери, какой тебе нравится больше!";
     }
 
+    public string AddedSomething(string assetType)
+    {
+        return $"Прекрасный выбор, далее - {assetType} для нашей открытки.\n" +
+               " Укажи, какой тебе нравится больше!";
+    }
+
     public string ResetMessage()
     {
         return "Я готов создать новую открытку для тебя.\n" +

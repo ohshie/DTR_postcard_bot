@@ -1,21 +1,21 @@
-using DTR_postcard_bot.ChannelBase;
 using DTR_postcard_bot.DataLayer.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace DTR_postcard_bot.DataLayer.Repository;
 
-public class AssetOperator(IRepository<Asset> repository, ChannelMapper channelMapper)
+public class AssetOperator(IRepository<Asset> repository, 
+    ILogger<AssetOperator> logger,
+    IConfiguration configuration)
 {
-    public async Task<Asset[]> GetAllAssets()
+    public async Task<List<Asset>> GetAllAssets()
     {
-        var assetList = await repository.GetAll(id: channelMapper.ChannelId) as Asset[];
+        var assetList = await repository.GetAll(id: configuration.GetSection("ChannelTag").Value) as List<Asset>;
 
-        if (assetList is null || !assetList.Any())
-        {
-            assetList = Array.Empty<Asset>();
-            return assetList;
-        }
+        if (assetList is not null && assetList.Any()) return assetList;
         
+        assetList = new();
         return assetList;
+
     }
 
     public async Task AddBatchAssets(List<Asset> assets)
