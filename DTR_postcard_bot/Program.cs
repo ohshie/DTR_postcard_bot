@@ -1,4 +1,5 @@
-﻿using DTR_postcard_bot.BotClient;
+﻿using DTR_postcard_bot.AssetManager;
+using DTR_postcard_bot.BotClient;
 using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BusinessLogic.CardCreator;
 using DTR_postcard_bot.BusinessLogic.ImageProcessor;
@@ -24,6 +25,9 @@ class Program
         {
             var dbContext = host.Services.GetRequiredService<PostcardDbContext>();
             await dbContext.Database.EnsureCreatedAsync();
+
+            var assetLoader = host.Services.GetRequiredService<AssetLoader>();
+            await assetLoader.Load();
             
             var botClient = host.Services.GetRequiredService<BotClient>();
             await botClient.BotOperations();
@@ -51,6 +55,11 @@ class Program
             return new TelegramBotClient(token!);
         });
 
+        collection.AddSingleton<ChannelMapper>();
+        
+        // Asset Manager
+        collection.AddSingleton<AssetLoader>();
+
         // Data Layer
         collection.AddDbContext<PostcardDbContext>(s =>
         {
@@ -58,6 +67,7 @@ class Program
         });
         
         collection.AddTransient<CardOperator>();
+        collection.AddTransient<AssetOperator>();
         collection.AddTransient<IRepository<Card>, CardRepository>();
         collection.AddTransient<IRepository<Asset>, AssetRepository>();
         

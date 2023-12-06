@@ -7,6 +7,7 @@ public interface IRepository<TEntity> where TEntity : class
     Task<TEntity> Get(long id);
     Task<IEnumerable<TEntity>> GetAll(long id);
     Task Add(TEntity id);
+    Task BatchAdd(List<TEntity> entities);
     Task Update(TEntity id);
     Task Remove(TEntity id);
 }

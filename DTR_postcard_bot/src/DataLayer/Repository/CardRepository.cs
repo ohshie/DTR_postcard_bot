@@ -22,6 +22,12 @@ public class CardRepository(PostcardDbContext dbContext) : IRepository<Card>
         await dbContext.SaveChangesAsync();
     }
 
+    public async Task BatchAdd(List<Card> entities)
+    {
+        await dbContext.CardCreationTables.AddRangeAsync(entities);
+        await dbContext.SaveChangesAsync();
+    }
+
     public async Task Update(Card id)
     {
         dbContext.CardCreationTables.Update(id);
