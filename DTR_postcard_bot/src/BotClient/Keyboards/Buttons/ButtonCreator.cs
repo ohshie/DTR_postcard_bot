@@ -1,4 +1,3 @@
-using DTR_postcard_bot.DataLayer.Models;
 using DTR_postcard_bot.DataLayer.Repository;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -15,7 +14,7 @@ public class ButtonCreator(AssetOperator assetOperator)
 
         foreach (var asset in availableAssets)
         {
-            if (asset.Type != assetType) continue;
+            if (asset.Type.Type != assetType) continue;
             
             ++counter;
             var button = InlineKeyboardButton.WithCallbackData(counter.ToString(), 

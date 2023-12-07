@@ -35,7 +35,7 @@ public abstract class CardCreatorBase
 
     private async Task ProcessTask(Card card, CallbackQuery query)
     {
-        if (query is not null && query.Data.StartsWith("/add"))
+        if (query is not null && query.Data.StartsWith("/add") || query.Data.StartsWith("/start_new"))
         {
             await Handle(card, query);
         }

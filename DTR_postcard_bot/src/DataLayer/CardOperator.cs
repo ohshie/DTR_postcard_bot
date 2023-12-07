@@ -32,7 +32,7 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
             Card card = new()
             {
                 UserId = userId,
-                LastBotMessageId = lastMessageId,
+                BotMessagesList = new(lastMessageId),
                 CardCreationInProcess = true,
                 Step = 0
             };

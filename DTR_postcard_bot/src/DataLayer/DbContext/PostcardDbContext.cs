@@ -7,6 +7,7 @@ public class PostcardDbContext : Microsoft.EntityFrameworkCore.DbContext
 {
     public required DbSet<Card> CardCreationTables { get; set; }
     public required DbSet<Asset> Assets { get; set; }
+    public required DbSet<AssetType> AssetTypes { get; set; }
     
     public PostcardDbContext(DbContextOptions<PostcardDbContext> options) : base(options) {}
 }

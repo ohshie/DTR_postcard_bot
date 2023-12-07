@@ -1,0 +1,43 @@
+{
+  "assetTypesByChannel":
+    {
+        "mzk":
+         {
+            "bg": "фон",
+            "char": "персонаж",
+            "text": "текст"
+         }
+    },
+  
+  "assetTypesMatched":
+  {
+    "mzk": 
+            [
+              "фон",
+              "персонаж",
+              "текст"
+            ]
+  },
+  "mediaLinks": [
+    {
+      "channel": "mzk",
+      "type": "bg",
+      "filePath": "https://i.postimg.cc/NG1dkz2D/1.png"
+    },
+    {
+      "channel": "mzk",
+      "type": "bg",
+      "filePath": "https://i.postimg.cc/NG1dkz2D/1.png"
+    },
+    {
+      "channel": "mzk",
+      "type": "char",
+      "filePath": "https://i.postimg.cc/VLg430Rb/1.png"
+    },
+    {
+      "channel": "mzk",
+      "type": "text",
+      "filePath": "https://i.postimg.cc/90twwTMP/1.png"
+    }
+  ]
+}

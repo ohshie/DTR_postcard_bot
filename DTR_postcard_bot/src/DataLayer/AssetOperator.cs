@@ -9,9 +9,13 @@ public class AssetOperator(IRepository<Asset> repository,
 {
     public async Task<List<Asset>> GetAllAssets()
     {
-        var assetList = await repository.GetAll(id: configuration.GetSection("ChannelTag").Value) as List<Asset>;
+        var assetList = await repository.GetAll() as List<Asset>;
 
-        if (assetList is not null && assetList.Any()) return assetList;
+        if (assetList is not null && assetList.Any())
+        {
+            var test = assetList.Where(a => a.Channel == configuration.GetSection("ChannelTag").Value);
+            return assetList;
+        }
         
         assetList = new();
         return assetList;
@@ -21,5 +25,12 @@ public class AssetOperator(IRepository<Asset> repository,
     public async Task AddBatchAssets(List<Asset> assets)
     {
         await repository.BatchAdd(assets);
+    }
+
+    public async Task DeleteAllAssets()
+    {
+        logger.LogWarning("Deleting all registered assets");
+        var assets = await repository.GetAll();
+        await repository.BatchRemove(assets);
     }
 }

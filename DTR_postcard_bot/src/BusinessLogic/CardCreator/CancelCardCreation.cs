@@ -23,7 +23,7 @@ public class CancelCardCreation(ILogger<CancelCardCreation> logger, CardOperator
 
         await messenger.UpdateMessageAsync(chatId: card.UserId, 
             text: textContent.ResetMessage(), 
-            messageId: card.LastBotMessageId, 
+            messageId: card.BotMessagesList.Last(), 
             keyboardMarkup: greetingsKeyboard.CreateKeyboard());
     }
 }

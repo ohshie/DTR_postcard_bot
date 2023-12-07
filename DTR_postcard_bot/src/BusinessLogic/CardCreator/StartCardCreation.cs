@@ -1,5 +1,6 @@
 using DTR_postcard_bot.BotClient;
 using DTR_postcard_bot.BotClient.Keyboards;
+using DTR_postcard_bot.BusinessLogic.CardCreator.ElementsHandler;
 using DTR_postcard_bot.BusinessLogic.TextContent;
 using DTR_postcard_bot.DataLayer;
 using Microsoft.Extensions.Configuration;
@@ -8,10 +9,7 @@ namespace DTR_postcard_bot.BusinessLogic.CardCreator;
 
 public class StartCardCreation(ILogger<StartCardCreation> logger,
     CardOperator cardOperator,
-    ITextContent textContent,
-    AssetChoiceKeyboard assetChoiceKeyboard,
-    BotMessenger botMessenger,
-    IConfiguration configuration)
+    RequestMedia requestMedia)
 {
     public async Task Handle(CallbackQuery query)
     {
@@ -20,12 +18,7 @@ public class StartCardCreation(ILogger<StartCardCreation> logger,
         if(await cardOperator.CheckIfExist(query.From.Id)) return;
 
         await cardOperator.RegisterNewCard(query.From.Id, query.Message.MessageId);
-
-        await botMessenger.UpdateMessageAsync(chatId: query.From.Id, messageId: query.Message.MessageId,
-            text: textContent.SelectBgMessage(),
-            keyboardMarkup: await assetChoiceKeyboard.CreateKeyboard(configuration
-                .GetSection("AssetPaths")
-                .GetChildren()
-                .First().Value!));
+        
+        await requestMedia.Execute(query: query);
     }
 }

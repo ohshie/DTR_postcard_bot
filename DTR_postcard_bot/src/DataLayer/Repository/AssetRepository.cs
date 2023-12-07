@@ -11,10 +11,9 @@ public class AssetRepository(PostcardDbContext dbContext) : IRepository<Asset>
         return await dbContext.Assets.FirstOrDefaultAsync(c => c.Id == id);
     }
     
-    public async Task<IEnumerable<Asset>> GetAll(string id)
+    public async Task<IEnumerable<Asset>> GetAll()
     {
-        var assets = await dbContext.Assets.Where(a => a.Channel == id).ToListAsync();
-        return assets;
+       return await dbContext.Assets.ToListAsync();
     }
 
     public async Task Add(Asset id)
@@ -23,7 +22,7 @@ public class AssetRepository(PostcardDbContext dbContext) : IRepository<Asset>
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task BatchAdd(List<Asset> entities)
+    public async Task BatchAdd(IEnumerable<Asset> entities)
     {
         await dbContext.Assets.AddRangeAsync(entities);
         await dbContext.SaveChangesAsync();
@@ -38,6 +37,12 @@ public class AssetRepository(PostcardDbContext dbContext) : IRepository<Asset>
     public async Task Remove(Asset id)
     {
         dbContext.Assets.Remove(id);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task BatchRemove(IEnumerable<Asset> entities)
+    {
+        dbContext.Assets.RemoveRange(entities);
         await dbContext.SaveChangesAsync();
     }
 }

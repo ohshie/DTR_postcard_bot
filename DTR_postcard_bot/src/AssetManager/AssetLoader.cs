@@ -1,3 +1,5 @@
+using System.Text.Json;
+using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
 using DTR_postcard_bot.DataLayer.Repository;
 using Microsoft.Extensions.Configuration;
@@ -5,69 +7,76 @@ using File = System.IO.File;
 
 namespace DTR_postcard_bot.AssetManager;
 
-public class AssetLoader(AssetOperator assetOperator, 
-    IConfiguration configuration)
+public class AssetLoader(AssetOperator assetOperator, AssetTypeOperator assetTypeOperator,
+    IConfiguration configuration, ILogger<AssetLoader> logger)
 {
     public async Task Load()
     {
-        var currentAssetsInDb = await assetOperator.GetAllAssets();
-        var assetsInFolders = await InitializeAssets();
+        await DumpOldAssets();
 
-        if (!currentAssetsInDb.Any())
-        {
-            await assetOperator.AddBatchAssets(assetsInFolders);
-        }
-        else
-        {
-            List<Asset> assetsToBeAdded = CompareAssets(currentAssetsInDb, assetsInFolders);
-            await assetOperator.AddBatchAssets(assetsToBeAdded);
-        }
+        var assetJson = await LoadJson();
+        
+        await InitializeAssetTypes(assetJson);
+        await InitializeAssets(assetJson);
     }
 
-    private async Task<List<Asset>> InitializeAssets()
+    private async Task InitializeAssetTypes(JsonDocument jDoc)
     {
-        List<Asset> assets = new();
+        List<AssetType> assetTypes = new();
         
-        foreach (var section in configuration.GetSection("AssetPaths").GetChildren())
+        var jsonChannels = jDoc.RootElement.GetProperty("assetTypesByChannel").EnumerateObject();
+
+        foreach (var channelAssets in jsonChannels)
         {
-            var typePath = PathBuilder(section.Value!);
-            var filesPaths = Directory.EnumerateFiles(typePath).ToArray();
-            foreach (var file in filesPaths)
+            foreach (var assetType in channelAssets.Value.EnumerateObject())
             {
-                var asset = new Asset()
+                var newAssetType = new AssetType()
                 {
-                    Channel = configuration.GetSection("ChannelTag").Value!,
-                    Type = section.Value!,
-                    FilePath = file
+                    Type = assetType.Name,
+                    Text = assetType.Value.ToString()
                 };
             
-                assets.Add(asset);
+                assetTypes.Add(newAssetType);
             }
         }
 
-        return assets;
+        await assetTypeOperator.BatchCreateTypes(assetTypes);
     }
 
-    private List<Asset> CompareAssets(List<Asset> assetsInDb, List<Asset> assetsInFolders)
+    private async Task InitializeAssets(JsonDocument jDoc)
     {
-        List<Asset> assetsToBeAdded = assetsInFolders.Where(currentAsset => !assetsInDb
-                .Any(a => a.FilePath == currentAsset.FilePath
-                && a.Channel == currentAsset.Channel
-                && a.Type == currentAsset.Type))
-            .ToList();
-
-        return assetsToBeAdded;
-    }
-
-    private string PathBuilder(string assetType)
-    {
-        string[] filePaths =
+        List<Asset> assets = new();
+        
+        var assetTypes = await assetTypeOperator.GetAllAssetTypes();
+        
+        foreach (var type in jDoc.RootElement.GetProperty("mediaLinks").EnumerateArray())
         {
-            AppDomain.CurrentDomain.BaseDirectory,
-            "assets",
-            assetType,
-        };
+            var asset = new Asset()
+            {
+                Channel = type.GetProperty("channel").ToString(),
+                FilePath = type.GetProperty("filePath").ToString(),
+                Type = assetTypes.FirstOrDefault(at => at.Type == type.GetProperty("type").ToString())
+            };
+            
+            assets.Add(asset);
+        }
 
-        return Path.Combine(filePaths);
+        await assetOperator.AddBatchAssets(assets);
+    }
+
+    private async Task<JsonDocument> LoadJson()
+    {
+        var assetJson = await File.ReadAllTextAsync(configuration.GetSection("PathToAssetJson").Value);
+        JsonDocument jDoc = JsonDocument.Parse(assetJson);
+        
+        return jDoc;
+    }
+
+    private async Task DumpOldAssets()
+    {
+        logger.LogWarning("Deleting old assets and asset types");
+        
+        await assetOperator.DeleteAllAssets();
+        await assetTypeOperator.BatchDeleteAssetTypes();
     }
 }

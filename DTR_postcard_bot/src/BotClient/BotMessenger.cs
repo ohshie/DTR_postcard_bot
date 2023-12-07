@@ -4,6 +4,22 @@ namespace DTR_postcard_bot.BotClient;
 
 public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> logger)
 {
+    public async Task<List<Message>> SendNewMediaMessage(long chatId, string text, InlineKeyboardMarkup keyboardMarkup, IEnumerable<InputMediaPhoto> media)
+    {
+        List<Message> combinedMediaAndTextMessages = new();
+
+        var mediaMessageArray = await botClient.SendMediaGroupAsync(chatId: chatId, media: media);
+        
+        var message = await botClient.SendTextMessageAsync(chatId: chatId,
+            text: text,
+            replyMarkup: keyboardMarkup);
+        
+        combinedMediaAndTextMessages.AddRange(mediaMessageArray);
+        combinedMediaAndTextMessages.Add(message);
+
+        return combinedMediaAndTextMessages;
+    }
+    
     public async Task UpdateMessageAsync(long chatId, string text, int messageId)
     {
         try
@@ -30,7 +46,7 @@ public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> lo
         }
     }
 
-    public async Task DeleteMessageAsync(int chatId, int messageId)
+    public async Task DeleteMessageAsync(long chatId, int messageId)
     {
         try
         {

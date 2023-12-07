@@ -2,9 +2,9 @@ using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
 using Microsoft.Extensions.Configuration;
 
-namespace DTR_postcard_bot.BusinessLogic.CardCreator.ElementsHandler;
+namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
 
-public class AddingElementHandler(CardOperator cardOperator, IConfiguration configuration)
+public class AddingMediaHandler(CardOperator cardOperator, IConfiguration configuration)
 {
     public async Task Handle(Card card, CallbackQuery query)
     {

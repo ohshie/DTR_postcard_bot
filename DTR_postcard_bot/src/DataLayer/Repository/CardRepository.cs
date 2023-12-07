@@ -11,9 +11,14 @@ public class CardRepository(PostcardDbContext dbContext) : IRepository<Card>
         return await dbContext.CardCreationTables.FirstOrDefaultAsync(c => c.UserId == id);
     }
 
-    public async Task<IEnumerable<Card>> GetAll(string id)
+    public async Task<IEnumerable<Card>> GetAll()
     {
-        return dbContext.CardCreationTables.Where(c => c.UserId.ToString() == id).ToList();
+        return await dbContext.CardCreationTables.ToListAsync();
+    }
+
+    public async Task<IEnumerable<Card>> GetAll(int id)
+    {
+        return dbContext.CardCreationTables.Where(c => c.UserId == id).ToList();
     }
 
     public async Task Add(Card id)
@@ -22,7 +27,7 @@ public class CardRepository(PostcardDbContext dbContext) : IRepository<Card>
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task BatchAdd(List<Card> entities)
+    public async Task BatchAdd(IEnumerable<Card> entities)
     {
         await dbContext.CardCreationTables.AddRangeAsync(entities);
         await dbContext.SaveChangesAsync();
@@ -37,6 +42,12 @@ public class CardRepository(PostcardDbContext dbContext) : IRepository<Card>
     public async Task Remove(Card id)
     {
         dbContext.CardCreationTables.Remove(id);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task BatchRemove(IEnumerable<Card> entities)
+    {
+        dbContext.CardCreationTables.RemoveRange(entities);
         await dbContext.SaveChangesAsync();
     }
 }

@@ -4,6 +4,7 @@ using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BotClient.Keyboards.Buttons;
 using DTR_postcard_bot.BusinessLogic.CardCreator;
 using DTR_postcard_bot.BusinessLogic.CardCreator.ElementsHandler;
+using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
 using DTR_postcard_bot.BusinessLogic.ImageProcessor;
 using DTR_postcard_bot.BusinessLogic.TextContent;
 using DTR_postcard_bot.DataLayer;
@@ -67,8 +68,10 @@ class Program
         
         collection.AddTransient<CardOperator>();
         collection.AddTransient<AssetOperator>();
+        collection.AddTransient<AssetTypeOperator>();
         collection.AddTransient<IRepository<Card>, CardRepository>();
         collection.AddTransient<IRepository<Asset>, AssetRepository>();
+        collection.AddTransient<IRepository<AssetType>, AssetTypeRepository>();
         
         // Bot client
         collection.AddTransient<BotClient>();
@@ -83,12 +86,14 @@ class Program
         
         // adding stuff to card
         collection.AddTransient<AddElementToCard>();
-        
-        collection.AddTransient<AddingElementHandler>();
+
+        collection.AddTransient<MediaPrepareHandler>();
+        collection.AddTransient<AddingMediaHandler>();
 
         // Card creation
         collection.AddTransient<StartCardCreation>();
         collection.AddTransient<CancelCardCreation>();
+        collection.AddTransient<RequestMedia>();
         
         // Image Processor
         collection.AddTransient<FileCleanUp>();

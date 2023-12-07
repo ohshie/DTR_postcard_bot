@@ -9,9 +9,9 @@ public class MzkTextContent : ITextContent
             "Для этого нажми на кнопку под этим сообщением и следуй моим указаниям.";
     }
 
-    public string SelectBgMessage()
+    public string FirstSelectMessage(string element)
     {
-        return "Отлично, первый шаг - выбор фона нашей открытки.\n" +
+        return $"Отлично, первый шаг - выбор {element} для нашей открытки.\n" +
                " Выбери, какой тебе нравится больше!";
     }
 
