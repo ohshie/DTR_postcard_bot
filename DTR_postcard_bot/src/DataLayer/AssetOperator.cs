@@ -7,6 +7,12 @@ public class AssetOperator(IRepository<Asset> repository,
     ILogger<AssetOperator> logger,
     IConfiguration configuration)
 {
+    public async Task<Asset> Get(long id)
+    {
+        var requestedAsset = await repository.Get(id);
+        return requestedAsset;
+    }
+    
     public async Task<List<Asset>> GetAllAssets()
     {
         var assetList = await repository.GetAll() as List<Asset>;

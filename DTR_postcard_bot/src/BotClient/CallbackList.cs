@@ -8,4 +8,5 @@ public static class CallbackList
     public const string StartCardCreation = Slash + "start_new_card";
     public const string Add = Slash + "add";
     public const string Cancel = Slash + "cancel";
+    public const string CreateNew = Slash + "another";
 }

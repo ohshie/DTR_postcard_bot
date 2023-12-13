@@ -9,6 +9,5 @@ public class Card
     public int Step { get; set; }
     public bool CardCreationInProcess { get; set; }
     public List<int> BotMessagesList { get; set; } = new();
-    public string PathToCurrentCardStep { get; set; } = string.Empty;
-    public string PathToPreviousCardStep { get; set; } = string.Empty;
+    public List<string> CreationSteps { get; set; }= new();
 }

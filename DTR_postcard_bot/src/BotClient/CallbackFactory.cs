@@ -9,7 +9,8 @@ public class CallbackFactory(StartCardCreation startCardCreation,
     {
         { CallbackList.StartCardCreation, startCardCreation.Handle },
         { CallbackList.Cancel, cancelCardCreation.Execute },
-        { CallbackList.Add, addElementToCard.Execute }
+        { CallbackList.Add, addElementToCard.Execute },
+        { CallbackList.CreateNew, startCardCreation.Handle }
     };
     
     public async Task CallBackDataManager(CallbackQuery query)

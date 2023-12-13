@@ -29,20 +29,13 @@ public abstract class CardCreatorBase
         
         if (NextTask is not null)
         {
-            await ProcessTask(card, query);
+            await NextTask.Handle(card, query);
         }
     }
 
     private async Task ProcessTask(Card card, CallbackQuery query)
     {
-        if (query is not null && query.Data.StartsWith("/add") || query.Data.StartsWith("/start_new"))
-        {
-            await Handle(card, query);
-        }
-        else
-        {
-            await Handle(card, null);
-        }
+        await Handle(card, query);
     }
 
     protected abstract Task Handle(Card card, CallbackQuery? query);

@@ -5,5 +5,6 @@ public interface ITextContent
     public string GreetingsMessage();
     public string FirstSelectMessage(string element);
     public string ResetMessage();
-    public string AddedSomething(string assetType);
+    public string RequestSomething(string assetType);
+    public string CompleteMessage();
 }

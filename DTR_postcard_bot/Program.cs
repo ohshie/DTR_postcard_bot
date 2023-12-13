@@ -5,7 +5,6 @@ using DTR_postcard_bot.BotClient.Keyboards.Buttons;
 using DTR_postcard_bot.BusinessLogic.CardCreator;
 using DTR_postcard_bot.BusinessLogic.CardCreator.ElementsHandler;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
-using DTR_postcard_bot.BusinessLogic.ImageProcessor;
 using DTR_postcard_bot.BusinessLogic.TextContent;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.DbContext;
@@ -78,7 +77,7 @@ class Program
         collection.AddTransient<BotMessenger>();
 
         collection.AddTransient<ButtonCreator>();
-        collection.AddTransient<GreetingsKeyboard>();
+        collection.AddTransient<CardCreationKeyboard>();
         collection.AddTransient<AssetChoiceKeyboard>();
         
         collection.AddTransient<BotGreetMessage>();
@@ -88,7 +87,7 @@ class Program
         collection.AddTransient<AddElementToCard>();
 
         collection.AddTransient<MediaPrepareHandler>();
-        collection.AddTransient<AddingMediaHandler>();
+        collection.AddTransient<AssembleMediaIntoCard>();
 
         // Card creation
         collection.AddTransient<StartCardCreation>();
@@ -96,7 +95,6 @@ class Program
         collection.AddTransient<RequestMedia>();
         
         // Image Processor
-        collection.AddTransient<FileCleanUp>();
         
         // Texts
         collection.AddTransient<ITextContent, MzkTextContent>();

@@ -1,10 +1,11 @@
 using Telegram.Bot.Types.ReplyMarkups;
+using File = System.IO.File;
 
 namespace DTR_postcard_bot.BotClient;
 
 public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> logger)
 {
-    public async Task<List<Message>> SendNewMediaMessage(long chatId, string text, InlineKeyboardMarkup keyboardMarkup, IEnumerable<InputMediaPhoto> media)
+    public async Task<List<Message>> SendNewMediaGroupMessage(long chatId, string text, InlineKeyboardMarkup keyboardMarkup, IEnumerable<InputMediaPhoto> media)
     {
         List<Message> combinedMediaAndTextMessages = new();
 
@@ -18,6 +19,18 @@ public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> lo
         combinedMediaAndTextMessages.Add(message);
 
         return combinedMediaAndTextMessages;
+    }
+
+    public async Task SendNewMediaMessage(long chatId, string text, InlineKeyboardMarkup keyboardMarkup,
+        string filePath)
+    {
+        using (var stream = new FileStream(filePath, FileMode.Open))
+        {
+            await botClient.SendPhotoAsync(chatId,
+                photo: InputFile.FromStream(stream),
+                caption: text,
+                replyMarkup: keyboardMarkup);
+        }
     }
     
     public async Task UpdateMessageAsync(long chatId, string text, int messageId)
@@ -55,6 +68,22 @@ public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> lo
         catch (Exception e)
         {
             logger.LogError("Error trying to delete message in {ChatId}, {MessageId}, produced {Exception}", chatId, messageId, e);
+            throw;
+        }
+    }
+
+    public async Task DeleteMessageRangeAsync(long chatId, List<int> messagesId)
+    {
+        try
+        {
+            foreach (var messageId in messagesId)
+            {
+                await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Error trying to delete message in {ChatId}, produced {Exception}", chatId, e);
             throw;
         }
     }

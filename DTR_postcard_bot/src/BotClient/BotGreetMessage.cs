@@ -3,7 +3,9 @@ using DTR_postcard_bot.BusinessLogic.TextContent;
 
 namespace DTR_postcard_bot.BotClient;
 
-public class BotGreetMessage(ITelegramBotClient botClient, ITextContent textContent, GreetingsKeyboard greetingsKeyboard)
+public class BotGreetMessage(ITelegramBotClient botClient, 
+    ITextContent textContent, 
+    CardCreationKeyboard cardCreationKeyboard, BotMessenger botMessenger)
 {
     public async Task Send(Message message)
     {
@@ -11,7 +13,14 @@ public class BotGreetMessage(ITelegramBotClient botClient, ITextContent textCont
         {
             await botClient.SendTextMessageAsync(message.Chat.Id, 
                 text: textContent.GreetingsMessage(), 
-                replyMarkup: greetingsKeyboard.CreateKeyboard());
+                replyMarkup: cardCreationKeyboard.CreateKeyboard());
         }
+    }
+
+    public async Task Send(long chatId)
+    {
+        await botClient.SendTextMessageAsync(chatId: chatId,
+            textContent.GreetingsMessage(),
+            replyMarkup: cardCreationKeyboard.CreateKeyboard());
     }
 }

@@ -1,5 +1,6 @@
 using DTR_postcard_bot.DataLayer.Models;
 using DTR_postcard_bot.DataLayer.Repository;
+using File = System.IO.File;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
 
@@ -13,7 +14,7 @@ public class MediaPrepareHandler(AssetOperator assetOperator)
         List<InputMediaPhoto> inputMediaPhotos = new();
         foreach (var asset in filteredAssets)
         {
-            InputMediaPhoto photo = new(media: InputFile.FromUri(asset.FilePath));
+            InputMediaPhoto photo = new(media: InputFile.FromUri(asset.FileUrl));
             inputMediaPhotos.Add(photo);
         }
 

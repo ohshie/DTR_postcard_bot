@@ -4,6 +4,7 @@ using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
 using DTR_postcard_bot.BusinessLogic.TextContent;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator.ElementsHandler;
 
@@ -15,6 +16,13 @@ public class RequestMedia : CardCreatorBase
     private readonly ITextContent _textContent;
     private readonly AssetChoiceKeyboard _assetChoiceKeyboard;
     private readonly MediaPrepareHandler _mediaPrepareHandler;
+    private readonly AssembleMediaIntoCard _assembleMediaIntoCard;
+    private readonly CardCreationKeyboard _cardCreationKeyboard;
+
+    string _newMessageText = string.Empty;
+    InlineKeyboardMarkup _keyboardMarkup;
+    List<InputMediaPhoto> _mediaContent;
+    private AssetType _requestedAssetType;
 
     public RequestMedia(ILogger<CardCreatorBase> logger, 
         CardOperator cardOperator, 
@@ -22,7 +30,9 @@ public class RequestMedia : CardCreatorBase
         BotMessenger botMessenger,
         ITextContent textContent, 
         AssetChoiceKeyboard assetChoiceKeyboard,
-        MediaPrepareHandler mediaPrepareHandler) : base(logger, cardOperator)
+        MediaPrepareHandler mediaPrepareHandler,
+        AssembleMediaIntoCard assembleMediaIntoCard,
+        CardCreationKeyboard cardCreationKeyboard) : base(logger, cardOperator)
     {
         _cardOperator = cardOperator;
         _assetTypeOperator = assetTypeOperator;
@@ -30,27 +40,58 @@ public class RequestMedia : CardCreatorBase
         _textContent = textContent;
         _assetChoiceKeyboard = assetChoiceKeyboard;
         _mediaPrepareHandler = mediaPrepareHandler;
+        _assembleMediaIntoCard = assembleMediaIntoCard;
+        _cardCreationKeyboard = cardCreationKeyboard;
     }
 
     protected override async Task Handle(Card card, CallbackQuery? query)
     {
-        var lastBotMessageId = query.Message.MessageId;
-        
         var assetTypes = await _assetTypeOperator.GetAllAssetTypes();
 
-        if (card.Step >= assetTypes.Count()) return;
+        // todo need to process this shit better. Make Separate class maybe for it. Because now it sucks dick.
+        
+        if (card.Step >= assetTypes.Count())
+        {
+            var createdFile = await _assembleMediaIntoCard.Handle(card);
+            await _botMessenger.DeleteMessageRangeAsync(card.UserId, card.BotMessagesList);
 
+            await _botMessenger.SendNewMediaMessage(card.UserId,
+                filePath: createdFile,
+                text: _textContent.CompleteMessage(),
+                keyboardMarkup: _cardCreationKeyboard.CreateKeyboard(false));
+
+            await _cardOperator.RemoveCard(card);
+            return;
+        }
+        
         card.Step++;
         
-        var newMessageText = _textContent.FirstSelectMessage(assetTypes.First().Text);
-        var keyboardMarkup = await _assetChoiceKeyboard.CreateKeyboard(assetTypes.First());
-        var mediaContent = await _mediaPrepareHandler.PrepareBatch(assetTypes.First());
+        if (card.Step == 1)
+        {
+            var lastBotMessageId = query.Message.MessageId;
+            
+            _requestedAssetType = assetTypes.First();
+            
+            await _botMessenger.DeleteMessageAsync(card.UserId, lastBotMessageId);
+            
+            _newMessageText = _textContent.FirstSelectMessage(_requestedAssetType.Text);
+        }
+        else
+        {
+            _requestedAssetType = assetTypes.ElementAtOrDefault(card.Step-1);
+            
+            _newMessageText = _textContent.RequestSomething(_requestedAssetType.Text);
 
-        await _botMessenger.DeleteMessageAsync(card.UserId, lastBotMessageId);
-        var newMessagesId = await _botMessenger.SendNewMediaMessage(chatId: query.From.Id,
-            text: newMessageText,
-            keyboardMarkup: keyboardMarkup,
-            media: mediaContent);
+            await _botMessenger.DeleteMessageRangeAsync(card.UserId, card.BotMessagesList);
+        }
+        
+        _keyboardMarkup = await _assetChoiceKeyboard.CreateKeyboard(_requestedAssetType);
+        _mediaContent = await _mediaPrepareHandler.PrepareBatch(_requestedAssetType);
+        
+        var newMessagesId = await _botMessenger.SendNewMediaGroupMessage(chatId: query.From.Id,
+            text: _newMessageText,
+            keyboardMarkup: _keyboardMarkup,
+            media: _mediaContent);
         
         card.BotMessagesList = newMessagesId.Select(m => m.MessageId).ToList();
 

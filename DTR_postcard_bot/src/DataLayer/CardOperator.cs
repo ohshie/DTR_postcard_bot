@@ -33,6 +33,7 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
             {
                 UserId = userId,
                 BotMessagesList = new(lastMessageId),
+                CreationSteps = new(),
                 CardCreationInProcess = true,
                 Step = 0
             };

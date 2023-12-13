@@ -1,9 +1,5 @@
-using DTR_postcard_bot.BotClient;
-using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BusinessLogic.CardCreator.ElementsHandler;
-using DTR_postcard_bot.BusinessLogic.TextContent;
 using DTR_postcard_bot.DataLayer;
-using Microsoft.Extensions.Configuration;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator;
 

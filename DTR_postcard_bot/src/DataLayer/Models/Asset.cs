@@ -9,5 +9,6 @@ public class Asset
     public long Id { get; set; }
     public AssetType? Type { get; set; }
     public string Channel { get; set; } = string.Empty;
-    public string FilePath { get; set; } = string.Empty;
+    public string FileUrl { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty;
 }
