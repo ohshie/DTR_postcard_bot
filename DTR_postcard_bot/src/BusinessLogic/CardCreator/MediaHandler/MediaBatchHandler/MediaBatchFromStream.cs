@@ -1,16 +1,33 @@
 using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DataLayer.Repository;
+using Telegram.Bot.Types.Enums;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.MediaBatchHandler;
 
-public class MediaBatchFromStream : IMediaBatchHandler
+public class MediaBatchFromStream(AssetOperator assetOperator) : IMediaBatchHandler
 {
-    public Task<IEnumerable<InputMediaPhoto>> PrepareBatch(AssetType assetType)
+    public async Task<IEnumerable<InputMediaPhoto>> PrepareBatch(AssetType assetType)
     {
-        throw new NotImplementedException();
+        var allRequiredAssets = await assetOperator.GetAssetsByType(assetType.Type);
+        
+        var inputMediaPhotos = AssembleBatch(allRequiredAssets!);
+
+        return inputMediaPhotos;
     }
 
-    public IEnumerable<InputMediaPhoto> AssembleBatch(List<Asset> assets, AssetType assetType)
+    private IEnumerable<InputMediaPhoto> AssembleBatch(IEnumerable<Asset> assets)
     {
-        throw new NotImplementedException();
+        List<InputMediaPhoto> photos = new();
+        
+        foreach (var asset in assets)
+        {
+            var stream = new FileStream(asset.FileUrl, FileMode.Open); 
+            InputMediaPhoto mediaPhoto = new(new InputFileStream(stream, 
+                fileName: $"{asset.Type.Type}_{asset.FileName}"));
+            
+            photos.Add(mediaPhoto);
+        }
+
+        return photos;
     }
 }

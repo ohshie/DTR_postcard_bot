@@ -25,7 +25,19 @@ public class AssetOperator(IRepository<Asset> repository,
         
         assetList = new();
         return assetList;
-
+    }
+    
+    public async Task<IEnumerable<Asset>> GetAssetsByType(string type)
+    {
+        var assets = await repository.GetAll() as IEnumerable<Asset>;
+        
+        if (assets.Any())
+        {
+            var soreted = assets.Where(a => a.Type.Type == type);
+            return soreted;
+        }
+        
+        return new List<Asset>();
     }
 
     public async Task AddBatchAssets(List<Asset> assets)

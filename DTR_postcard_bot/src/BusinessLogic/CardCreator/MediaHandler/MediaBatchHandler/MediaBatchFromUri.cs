@@ -8,18 +8,16 @@ public class MediaBatchFromUri(AssetOperator assetOperator) : IMediaBatchHandler
 {
     public async Task<IEnumerable<InputMediaPhoto>> PrepareBatch(AssetType assetType)
     {
-        var allRequiredAssets = await assetOperator.GetAllAssets();
+        var allRequiredAssets = await assetOperator.GetAssetsByType(assetType.Type);
 
-        var inputMediaPhotos = AssembleBatch(allRequiredAssets, assetType);
+        var inputMediaPhotos = AssembleBatch(allRequiredAssets);
 
         return inputMediaPhotos;
     }
-    
-    public IEnumerable<InputMediaPhoto> AssembleBatch(List<Asset> assets, AssetType assetType)
-    {
-        var filteredAssets = assets.Where(a => a.Type == assetType);
 
-        return filteredAssets
+    private IEnumerable<InputMediaPhoto> AssembleBatch(IEnumerable<Asset> assets)
+    {
+        return assets
             .Select(asset => new InputMediaPhoto(media: InputFile.FromUri(asset.FileUrl)));
     }
 }

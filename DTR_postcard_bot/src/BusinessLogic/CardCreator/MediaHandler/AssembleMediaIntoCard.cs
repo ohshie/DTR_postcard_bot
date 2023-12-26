@@ -1,5 +1,4 @@
 using DTR_postcard_bot.DataLayer.Models;
-using System.Drawing;
 using DTR_postcard_bot.DataLayer.Repository;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -21,12 +20,29 @@ public class AssembleMediaIntoCard(AssetOperator assetOperator)
         foreach (var step in card.CreationSteps)
         {
             var typeAndId = step.Split(" ");
-            Image asset = await LoadImages(typeAndId.First(), long.Parse(typeAndId.Last()));
+            var asset = await LoadImages(typeAndId.First(), long.Parse(typeAndId.Last()));
             images.Add(asset);
         }
-        
-        int width = 720;
-        int height = 720;
+
+        await ImageManipulation(images, card);
+
+        return _pathToCreatedFile;
+    }
+
+    private async Task<Image> LoadImages(string type, long id)
+    {
+        var assetName = await assetOperator.Get(id);
+        var pathToAsset = Helpers.PathBuilder(folderType: _assetsFolderName,
+            subfolder: type, 
+            fileName: assetName.FileName);
+
+        return await Image.LoadAsync(pathToAsset);
+    }
+
+    private async Task ImageManipulation(IEnumerable<Image> images, Card card)
+    {
+        const int width = 720;
+        const int height = 720;
 
         using (var canvas = new Image<Rgba32>(width, height))
         {
@@ -34,18 +50,18 @@ public class AssembleMediaIntoCard(AssetOperator assetOperator)
             {
                 foreach (var image in images)
                 {
-                    int offsetX = (width - image.Width) / 2;
-                    int offsetY = (height - image.Height) / 2;
+                    var offsetX = (width - image.Width) / 2;
+                    var offsetY = (height - image.Height) / 2;
 
                     x.DrawImage(image, new Point(offsetX, offsetY), 1f);
                 }
             });
 
-            _pathToCreatedFile = PathBuilder(folderType: "output", 
+            _pathToCreatedFile = Helpers.PathBuilder(folderType: "output", 
                 subfolder: card.UserId.ToString(),
-                fileName: _random.Next(99)+".jpg");
+                fileName: _random.Next(999)+".jpg");
             
-            Directory.CreateDirectory(PathBuilder(folderType: "output", 
+            Directory.CreateDirectory(Helpers.PathBuilder(folderType: "output", 
                 subfolder: card.UserId.ToString()));
             
             await canvas.SaveAsync(_pathToCreatedFile);
@@ -55,44 +71,5 @@ public class AssembleMediaIntoCard(AssetOperator assetOperator)
         {
             image.Dispose();
         }
-
-        return _pathToCreatedFile;
-    }
-
-    private async Task<Image> LoadImages(string type, long id)
-    {
-        var assetName = await assetOperator.Get(id);
-        var pathToAsset = PathBuilder(folderType: _assetsFolderName,
-            subfolder: type, 
-            fileName: assetName.FileName);
-
-        return await Image.LoadAsync(pathToAsset);
-    }
-
-    private string PathBuilder(string folderType,string subfolder, string? fileName = null)
-    {
-        string[] path;
-        
-        if (fileName is not null)
-        {
-            path = new[] 
-            { 
-                AppDomain.CurrentDomain.BaseDirectory, 
-                folderType, 
-                subfolder, 
-                fileName 
-            };
-        }
-        else
-        {
-            path = new[] 
-            { 
-                AppDomain.CurrentDomain.BaseDirectory, 
-                folderType, 
-                subfolder, 
-            };
-        }
-        
-        return Path.Combine(path);
     }
 }

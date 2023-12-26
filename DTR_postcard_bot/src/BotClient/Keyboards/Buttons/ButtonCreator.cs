@@ -9,7 +9,7 @@ public class ButtonCreator(AssetOperator assetOperator)
     {
         List<InlineKeyboardButton> buttons = new();
         
-        var availableAssets = await assetOperator.GetAllAssets();
+        var availableAssets = await assetOperator.GetAssetsByType(assetType);
         var counter = 0;
 
         foreach (var asset in availableAssets)

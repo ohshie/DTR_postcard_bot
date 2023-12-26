@@ -55,9 +55,12 @@ public class AssetLoader(AssetOperator assetOperator, AssetTypeOperator assetTyp
             {
                 Channel = type.GetProperty("channel").ToString(),
                 FileName = type.GetProperty("filePath").ToString(),
-                FileUrl = type.GetProperty("fileUrl").ToString(),
                 Type = assetTypes.FirstOrDefault(at => at.Type == type.GetProperty("type").ToString())
             };
+
+            asset.FileUrl = string.IsNullOrEmpty(type.GetProperty("fileUrl").ToString()) 
+                ? Helpers.PathBuilder("assets", asset.Type.Type, asset.FileName) 
+                : type.GetProperty("fileUrl").ToString();
             
             assets.Add(asset);
         }

@@ -11,9 +11,15 @@ public class AssetTypeRepository(PostcardDbContext dbContext) : IRepository<Asse
         return await dbContext.AssetTypes.FirstOrDefaultAsync(at => at.Id == id);
     }
 
-    public async Task<IEnumerable<AssetType>> GetAll()
+    public async Task<IQueryable<AssetType>> GetAll()
     {
-        return await dbContext.AssetTypes.ToListAsync();
+        return dbContext.AssetTypes.AsQueryable();
+    }
+
+    public async Task<IEnumerable<AssetType>> GetAllByType(AssetType requestedType)
+    {
+        return await dbContext.AssetTypes.Where(at => at.Type == requestedType.Type).ToListAsync();
+        
     }
 
     public async Task Add(AssetType entity)

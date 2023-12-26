@@ -87,7 +87,7 @@ class Program
         // adding stuff to card
         collection.AddTransient<AddElementToCard>();
 
-        collection.AddTransient<IMediaBatchHandler,MediaBatchFromUri>();
+        collection.AddTransient<IMediaBatchHandler, MediaBatchFromStream>();
         collection.AddTransient<AssembleMediaIntoCard>();
 
         // Card creation

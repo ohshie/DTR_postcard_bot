@@ -11,9 +11,9 @@ public class CardRepository(PostcardDbContext dbContext) : IRepository<Card>
         return await dbContext.Cards.FirstOrDefaultAsync(c => c.UserId == id);
     }
 
-    public async Task<IEnumerable<Card>> GetAll()
+    public async Task<IQueryable<Card>> GetAll()
     {
-        return await dbContext.Cards.ToListAsync();
+        return dbContext.Cards.AsQueryable();
     }
 
     public async Task<IEnumerable<Card>> GetAll(int id)

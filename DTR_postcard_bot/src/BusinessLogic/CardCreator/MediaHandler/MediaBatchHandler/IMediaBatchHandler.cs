@@ -5,6 +5,4 @@ namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.MediaBatchHand
 public interface IMediaBatchHandler
 {
     Task<IEnumerable<InputMediaPhoto>> PrepareBatch(AssetType assetType);
-
-    IEnumerable<InputMediaPhoto> AssembleBatch(List<Asset> assets, AssetType assetType);
 }
