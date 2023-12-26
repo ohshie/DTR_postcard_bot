@@ -2,7 +2,7 @@ using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.MediaBatchHandler;
 using DTR_postcard_bot.DataLayer.Models;
 using DTR_postcard_bot.DataLayer.Repository;
 
-namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
+namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
 
 public class MediaBatchFromUri(AssetOperator assetOperator) : IMediaBatchHandler
 {
