@@ -11,4 +11,8 @@ public class Asset
     public string Channel { get; set; } = string.Empty;
     public string FileUrl { get; set; } = string.Empty;
     public string FileName { get; set; } = string.Empty;
+    
+    public string Text { get; set; } = string.Empty;
+    public bool OutputAsset { get; set; }
+    public bool DisplayAsset { get; set; }
 }

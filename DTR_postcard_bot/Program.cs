@@ -3,7 +3,6 @@ using DTR_postcard_bot.BotClient;
 using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BotClient.Keyboards.Buttons;
 using DTR_postcard_bot.BusinessLogic.CardCreator;
-using DTR_postcard_bot.BusinessLogic.CardCreator.ElementsHandler;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.MediaBatchHandler;
 using DTR_postcard_bot.BusinessLogic.TextContent;
@@ -88,6 +87,7 @@ class Program
         collection.AddTransient<AddElementToCard>();
 
         collection.AddTransient<IMediaBatchHandler, MediaBatchFromStream>();
+        collection.AddTransient<TextAssetHandler>();
         collection.AddTransient<AssembleMediaIntoCard>();
 
         // Card creation

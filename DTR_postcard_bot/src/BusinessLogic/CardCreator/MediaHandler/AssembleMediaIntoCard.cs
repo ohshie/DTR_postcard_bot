@@ -41,8 +41,8 @@ public class AssembleMediaIntoCard(AssetOperator assetOperator)
 
     private async Task ImageManipulation(IEnumerable<Image> images, Card card)
     {
-        const int width = 720;
-        const int height = 720;
+        const int width = 839;
+        const int height = 595;
 
         using (var canvas = new Image<Rgba32>(width, height))
         {

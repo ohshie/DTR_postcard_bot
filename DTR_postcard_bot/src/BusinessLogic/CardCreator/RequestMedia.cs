@@ -7,7 +7,7 @@ using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace DTR_postcard_bot.BusinessLogic.CardCreator.ElementsHandler;
+namespace DTR_postcard_bot.BusinessLogic.CardCreator;
 
 public class RequestMedia : CardCreatorBase
 {
@@ -19,6 +19,7 @@ public class RequestMedia : CardCreatorBase
     private readonly IMediaBatchHandler _mediaBatchHandler;
     private readonly AssembleMediaIntoCard _assembleMediaIntoCard;
     private readonly CardCreationKeyboard _cardCreationKeyboard;
+    private readonly TextAssetHandler _textAssetHandler;
 
     string _newMessageText = string.Empty;
     InlineKeyboardMarkup _keyboardMarkup;
@@ -33,7 +34,7 @@ public class RequestMedia : CardCreatorBase
         AssetChoiceKeyboard assetChoiceKeyboard,
         IMediaBatchHandler mediaBatchHandler,
         AssembleMediaIntoCard assembleMediaIntoCard,
-        CardCreationKeyboard cardCreationKeyboard) : base(logger, cardOperator)
+        CardCreationKeyboard cardCreationKeyboard, TextAssetHandler textAssetHandler) : base(logger, cardOperator)
     {
         _cardOperator = cardOperator;
         _assetTypeOperator = assetTypeOperator;
@@ -43,6 +44,7 @@ public class RequestMedia : CardCreatorBase
         _mediaBatchHandler = mediaBatchHandler;
         _assembleMediaIntoCard = assembleMediaIntoCard;
         _cardCreationKeyboard = cardCreationKeyboard;
+        _textAssetHandler = textAssetHandler;
     }
 
     protected override async Task Handle(Card card, CallbackQuery? query)
@@ -87,15 +89,36 @@ public class RequestMedia : CardCreatorBase
         }
         
         _keyboardMarkup = await _assetChoiceKeyboard.CreateKeyboard(_requestedAssetType);
-        _mediaContent = await _mediaBatchHandler.PrepareBatch(_requestedAssetType);
-        
-        var newMessagesId = await _botMessenger.SendNewMediaGroupMessage(chatId: query.From.Id,
-            text: _newMessageText,
-            keyboardMarkup: _keyboardMarkup,
-            media: _mediaContent);
-        
-        card.BotMessagesList = newMessagesId.Select(m => m.MessageId).ToList();
+
+        await PrepareMessages(card, query.From.Id);
 
         await _cardOperator.UpdateCard(card);
+    }
+
+    private async Task PrepareMessages(Card card, long chatId)
+    {
+        List<Message> newMessagesId = new();
+        
+        if (_requestedAssetType.Type != "text")
+        {
+            _mediaContent = await _mediaBatchHandler.PrepareBatch(_requestedAssetType);
+            
+            newMessagesId = await _botMessenger.SendNewMediaGroupMessage(chatId: chatId,
+                text: _newMessageText,
+                keyboardMarkup: _keyboardMarkup,
+                media: _mediaContent);
+        
+            card.BotMessagesList = newMessagesId.Select(m => m.MessageId).ToList();
+        }
+        else
+        {
+            var assetsText = await _textAssetHandler.PrepareBatch(_requestedAssetType);
+
+            var message = await _botMessenger.SendTextMessage(chatId: chatId,
+                text: assetsText,
+                keyboardMarkup: _keyboardMarkup);
+
+            card.BotMessagesList = new List<int>() { message.MessageId };
+        }
     }
 }

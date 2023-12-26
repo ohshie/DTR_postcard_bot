@@ -14,7 +14,7 @@ public class ButtonCreator(AssetOperator assetOperator)
 
         foreach (var asset in availableAssets)
         {
-            if (asset.Type.Type != assetType) continue;
+            if (asset.Type.Type != assetType || !asset.OutputAsset) continue;
             
             ++counter;
             var button = InlineKeyboardButton.WithCallbackData(counter.ToString(), 

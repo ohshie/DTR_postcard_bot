@@ -54,13 +54,19 @@ public class AssetLoader(AssetOperator assetOperator, AssetTypeOperator assetTyp
             var asset = new Asset()
             {
                 Channel = type.GetProperty("channel").ToString(),
-                FileName = type.GetProperty("filePath").ToString(),
-                Type = assetTypes.FirstOrDefault(at => at.Type == type.GetProperty("type").ToString())
+                Type = assetTypes.FirstOrDefault(at => at.Type == type.GetProperty("type").ToString()),
+                FileName = type.GetProperty("filePath").ToString()
             };
+
+            type.TryGetProperty("text", out var text);
+            asset.Text = text.ToString();
 
             asset.FileUrl = string.IsNullOrEmpty(type.GetProperty("fileUrl").ToString()) 
                 ? Helpers.PathBuilder("assets", asset.Type.Type, asset.FileName) 
                 : type.GetProperty("fileUrl").ToString();
+
+            asset.OutputAsset = type.GetProperty("outputAsset").GetBoolean();
+            asset.DisplayAsset = type.GetProperty("displayAsset").GetBoolean();
             
             assets.Add(asset);
         }

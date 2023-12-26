@@ -1,6 +1,5 @@
 using DTR_postcard_bot.DataLayer.Models;
 using DTR_postcard_bot.DataLayer.Repository;
-using Telegram.Bot.Types.Enums;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.MediaBatchHandler;
 
@@ -10,7 +9,7 @@ public class MediaBatchFromStream(AssetOperator assetOperator) : IMediaBatchHand
     {
         var allRequiredAssets = await assetOperator.GetAssetsByType(assetType.Type);
         
-        var inputMediaPhotos = AssembleBatch(allRequiredAssets!);
+        var inputMediaPhotos = AssembleBatch(allRequiredAssets.Where(a => a.DisplayAsset));
 
         return inputMediaPhotos;
     }

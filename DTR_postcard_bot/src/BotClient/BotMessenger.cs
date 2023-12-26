@@ -5,6 +5,15 @@ namespace DTR_postcard_bot.BotClient;
 
 public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> logger)
 {
+    public async Task<Message> SendTextMessage(long chatId, string text, InlineKeyboardMarkup keyboardMarkup)
+    {
+        var assetTextMessage = await botClient.SendTextMessageAsync(chatId: chatId,
+            text: text,
+            replyMarkup: keyboardMarkup);
+
+        return assetTextMessage;
+    }
+    
     public async Task<List<Message>> SendNewMediaGroupMessage(long chatId, string text, InlineKeyboardMarkup keyboardMarkup, IEnumerable<InputMediaPhoto> media)
     {
         List<Message> combinedMediaAndTextMessages = new();
