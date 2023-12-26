@@ -8,7 +8,7 @@ public class BotClient(ITelegramBotClient botClient,
     ILogger<BotClient> logger, BotGreetMessage botGreetMessage,
     CallbackFactory callbackFactory)
 {
-    private static readonly ManualResetEvent ShutdownEvent = new ManualResetEvent(false);
+    private static readonly ManualResetEvent ShutdownEvent = new(false);
 
     public async Task BotOperations()
     {
@@ -16,7 +16,8 @@ public class BotClient(ITelegramBotClient botClient,
 
         ReceiverOptions receiverOptions = new ReceiverOptions()
         {
-            AllowedUpdates = Array.Empty<UpdateType>()
+            AllowedUpdates = new[] { UpdateType.Message, UpdateType.CallbackQuery},
+            ThrowPendingUpdates = true
         };
 
         botClient.StartReceiving(
@@ -44,10 +45,11 @@ public class BotClient(ITelegramBotClient botClient,
             await callbackFactory.CallBackDataManager(callbackQuery);
             return;
         }
-        
-        if (update.Message is not {} message) return;
 
-        await botGreetMessage.Send(message);
+        if (update.Message is not null)
+        {
+            await botGreetMessage.Send(update.Message);
+        }
     }
     
     Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

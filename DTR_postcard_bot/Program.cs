@@ -5,6 +5,7 @@ using DTR_postcard_bot.BotClient.Keyboards.Buttons;
 using DTR_postcard_bot.BusinessLogic.CardCreator;
 using DTR_postcard_bot.BusinessLogic.CardCreator.ElementsHandler;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
+using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.MediaBatchHandler;
 using DTR_postcard_bot.BusinessLogic.TextContent;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.DbContext;
@@ -62,7 +63,7 @@ class Program
         // Data Layer
         collection.AddDbContext<PostcardDbContext>(s =>
         {
-            s.UseSqlite(context.Configuration.GetConnectionString("DefaultConnection")!);
+            s.UseSqlite(context.Configuration.GetConnectionString("DefaultConnection"));
         });
         
         collection.AddTransient<CardOperator>();
@@ -86,7 +87,7 @@ class Program
         // adding stuff to card
         collection.AddTransient<AddElementToCard>();
 
-        collection.AddTransient<MediaPrepareHandler>();
+        collection.AddTransient<IMediaBatchHandler,MediaBatchFromUri>();
         collection.AddTransient<AssembleMediaIntoCard>();
 
         // Card creation

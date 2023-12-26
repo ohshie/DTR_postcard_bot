@@ -1,6 +1,7 @@
 using DTR_postcard_bot.BotClient;
 using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
+using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.MediaBatchHandler;
 using DTR_postcard_bot.BusinessLogic.TextContent;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
@@ -15,13 +16,13 @@ public class RequestMedia : CardCreatorBase
     private readonly BotMessenger _botMessenger;
     private readonly ITextContent _textContent;
     private readonly AssetChoiceKeyboard _assetChoiceKeyboard;
-    private readonly MediaPrepareHandler _mediaPrepareHandler;
+    private readonly IMediaBatchHandler _mediaBatchHandler;
     private readonly AssembleMediaIntoCard _assembleMediaIntoCard;
     private readonly CardCreationKeyboard _cardCreationKeyboard;
 
     string _newMessageText = string.Empty;
     InlineKeyboardMarkup _keyboardMarkup;
-    List<InputMediaPhoto> _mediaContent;
+    IEnumerable<InputMediaPhoto> _mediaContent;
     private AssetType _requestedAssetType;
 
     public RequestMedia(ILogger<CardCreatorBase> logger, 
@@ -30,7 +31,7 @@ public class RequestMedia : CardCreatorBase
         BotMessenger botMessenger,
         ITextContent textContent, 
         AssetChoiceKeyboard assetChoiceKeyboard,
-        MediaPrepareHandler mediaPrepareHandler,
+        IMediaBatchHandler mediaBatchHandler,
         AssembleMediaIntoCard assembleMediaIntoCard,
         CardCreationKeyboard cardCreationKeyboard) : base(logger, cardOperator)
     {
@@ -39,7 +40,7 @@ public class RequestMedia : CardCreatorBase
         _botMessenger = botMessenger;
         _textContent = textContent;
         _assetChoiceKeyboard = assetChoiceKeyboard;
-        _mediaPrepareHandler = mediaPrepareHandler;
+        _mediaBatchHandler = mediaBatchHandler;
         _assembleMediaIntoCard = assembleMediaIntoCard;
         _cardCreationKeyboard = cardCreationKeyboard;
     }
@@ -86,7 +87,7 @@ public class RequestMedia : CardCreatorBase
         }
         
         _keyboardMarkup = await _assetChoiceKeyboard.CreateKeyboard(_requestedAssetType);
-        _mediaContent = await _mediaPrepareHandler.PrepareBatch(_requestedAssetType);
+        _mediaContent = await _mediaBatchHandler.PrepareBatch(_requestedAssetType);
         
         var newMessagesId = await _botMessenger.SendNewMediaGroupMessage(chatId: query.From.Id,
             text: _newMessageText,
