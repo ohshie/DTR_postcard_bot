@@ -38,7 +38,7 @@ public class BotClient(ITelegramBotClient botClient,
     
     async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        logger.LogWarning("Handling update {Update} type {Type}", update.Id, update.Type);
+        logger.LogWarning("Handling update {Update} type {Type} from", update.Id, update.Type);
         
         if (update.CallbackQuery is { } callbackQuery)
         {

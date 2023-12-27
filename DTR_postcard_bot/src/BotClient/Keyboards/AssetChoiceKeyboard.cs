@@ -10,25 +10,51 @@ public class AssetChoiceKeyboard(ButtonCreator buttonCreator)
     public async Task<InlineKeyboardMarkup> CreateKeyboard(AssetType assetType, bool firstStep = false)
     {
         InlineKeyboardMarkup keyboard;
+        InlineKeyboardButton[][] bigKeyboardLayout;
         
-        if (firstStep)
+        var choiceButtons = await buttonCreator.AssembleChoiceButtons(assetType.Type);
+
+        if (choiceButtons.Length > 4)
+        {
+            keyboard = AssembleBigKeyboard(choiceButtons);
+        }
+        else
         {
             keyboard = new InlineKeyboardMarkup(new[]
             {
-                await buttonCreator.AssembleChoiceButtons(assetType.Type),
+                choiceButtons
             });
-            return keyboard;
         }
         
-        keyboard = new InlineKeyboardMarkup(new[]
+        if (!firstStep)
         {
-            await buttonCreator.AssembleChoiceButtons(assetType.Type),
-            new[]
+            keyboard = keyboard.InlineKeyboard.Append(new[]
             {
-                InlineKeyboardButton.WithCallbackData(text: "Я передумал, давай начнем заново", 
+                InlineKeyboardButton.WithCallbackData(text: "Я передумал, давай начнем заново",
                     callbackData: CallbackList.Cancel)
-            }
-        });
+            }).ToArray();
+        }
+        
         return keyboard;
+    }
+
+    private InlineKeyboardMarkup AssembleBigKeyboard(InlineKeyboardButton[] choiceButtons)
+    {
+        var splitter = choiceButtons.Length / 2;
+        var firstRow = choiceButtons
+            .Take(splitter)
+            .ToArray();
+            
+        var secondRow = choiceButtons
+            .Skip(splitter)
+            .ToArray();
+
+        var bigKeyboardLayout = new[] 
+        { 
+            firstRow, 
+            secondRow 
+        };
+
+        return bigKeyboardLayout;
     }
 }
