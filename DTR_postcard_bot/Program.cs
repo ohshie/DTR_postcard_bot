@@ -28,8 +28,8 @@ class Program
             var dbContext = host.Services.GetRequiredService<PostcardDbContext>();
             await dbContext.Database.EnsureCreatedAsync();
             
-            var assetLoader = host.Services.GetRequiredService<AssetLoader>();
-            await assetLoader.Load();
+            var loader = host.Services.GetRequiredService<Loader>();
+            await loader.Execute();
             
             var botClient = host.Services.GetRequiredService<BotClient>();
             await botClient.BotOperations();
@@ -58,7 +58,11 @@ class Program
         });
         
         // Asset Manager
+        collection.AddSingleton<Loader>();
+        collection.AddSingleton<AssetCleaner>();
+        collection.AddSingleton<AssetTypeLoader>();
         collection.AddSingleton<AssetLoader>();
+        collection.AddSingleton<TextLoader>();
 
         // Data Layer
         collection.AddDbContext<PostcardDbContext>(s =>
@@ -69,9 +73,11 @@ class Program
         collection.AddTransient<CardOperator>();
         collection.AddTransient<AssetOperator>();
         collection.AddTransient<AssetTypeOperator>();
+        collection.AddTransient<TextOperator>();
         collection.AddTransient<IRepository<Card>, CardRepository>();
         collection.AddTransient<IRepository<Asset>, AssetRepository>();
         collection.AddTransient<IRepository<AssetType>, AssetTypeRepository>();
+        collection.AddTransient<IRepository<Text>, TextRepository>();
         
         // Bot client
         collection.AddTransient<BotClient>();

@@ -7,47 +7,22 @@ using File = System.IO.File;
 
 namespace DTR_postcard_bot.AssetManager;
 
-public class AssetLoader(AssetOperator assetOperator, AssetTypeOperator assetTypeOperator,
-    IConfiguration configuration, ILogger<AssetLoader> logger)
+public class AssetLoader(AssetOperator assetOperator, 
+    AssetTypeOperator assetTypeOperator)
 {
-    public async Task Load()
+    public async Task Load(JsonDocument jDoc)
     {
-        await DumpOldAssets();
-
-        var assetJson = await LoadJson();
+        var assetTypes = await assetTypeOperator.GetAllAssetTypes();
         
-        await InitializeAssetTypes(assetJson);
-        await InitializeAssets(assetJson);
+        var assets = AssembleIntoBatch(jDoc, assetTypes);
+
+        await assetOperator.AddBatchAssets(assets);
     }
 
-    private async Task InitializeAssetTypes(JsonDocument jDoc)
-    {
-        List<AssetType> assetTypes = new();
-        
-        var jsonChannels = jDoc.RootElement.GetProperty("assetTypesByChannel").EnumerateObject();
-
-        foreach (var channelAssets in jsonChannels)
-        {
-            foreach (var assetType in channelAssets.Value.EnumerateObject())
-            {
-                var newAssetType = new AssetType()
-                {
-                    Type = assetType.Name,
-                    Text = assetType.Value.ToString()
-                };
-            
-                assetTypes.Add(newAssetType);
-            }
-        }
-
-        await assetTypeOperator.BatchCreateTypes(assetTypes);
-    }
-
-    private async Task InitializeAssets(JsonDocument jDoc)
+    private List<Asset> AssembleIntoBatch(JsonDocument jDoc, 
+        IEnumerable<AssetType> assetTypes)
     {
         List<Asset> assets = new();
-        
-        var assetTypes = await assetTypeOperator.GetAllAssetTypes();
         
         foreach (var type in jDoc.RootElement.GetProperty("mediaLinks").EnumerateArray())
         {
@@ -61,32 +36,16 @@ public class AssetLoader(AssetOperator assetOperator, AssetTypeOperator assetTyp
             type.TryGetProperty("text", out var text);
             asset.Text = text.ToString();
 
-            asset.FileUrl = string.IsNullOrEmpty(type.GetProperty("fileUrl").ToString()) 
-                ? Helpers.PathBuilder("assets", asset.Type.Type, asset.FileName) 
+            asset.FileUrl = string.IsNullOrEmpty(type.GetProperty("fileUrl").ToString())
+                ? Helpers.PathBuilder("assets", asset.Type.Type, asset.FileName)
                 : type.GetProperty("fileUrl").ToString();
 
             asset.OutputAsset = type.GetProperty("outputAsset").GetBoolean();
             asset.DisplayAsset = type.GetProperty("displayAsset").GetBoolean();
-            
+
             assets.Add(asset);
         }
 
-        await assetOperator.AddBatchAssets(assets);
-    }
-
-    private async Task<JsonDocument> LoadJson()
-    {
-        var assetJson = await File.ReadAllTextAsync(configuration.GetSection("PathToAssetJson").Value);
-        JsonDocument jDoc = JsonDocument.Parse(assetJson);
-        
-        return jDoc;
-    }
-
-    private async Task DumpOldAssets()
-    {
-        logger.LogWarning("Deleting old assets and asset types");
-        
-        await assetOperator.DeleteAllAssets();
-        await assetTypeOperator.BatchDeleteAssetTypes();
+        return assets;
     }
 }
