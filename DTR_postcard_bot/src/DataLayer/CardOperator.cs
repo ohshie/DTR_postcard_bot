@@ -25,7 +25,7 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
         return card;
     }
     
-    public async Task RegisterNewCard(long userId, int lastMessageId)
+    public async Task RegisterNewCard(long userId, int lastMessageId, IEnumerable<AssetType> assetTypes)
     {
         try
         {
@@ -35,7 +35,8 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
                 BotMessagesList = new(lastMessageId),
                 CreationSteps = new(),
                 CardCreationInProcess = true,
-                Step = 0
+                Step = 0,
+                AssetTypes = assetTypes.ToList()
             };
             
             await repository.Add(card);

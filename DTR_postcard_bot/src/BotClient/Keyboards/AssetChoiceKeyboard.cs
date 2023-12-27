@@ -7,9 +7,20 @@ namespace DTR_postcard_bot.BotClient.Keyboards;
 
 public class AssetChoiceKeyboard(ButtonCreator buttonCreator)
 {
-    public async Task<InlineKeyboardMarkup> CreateKeyboard(AssetType assetType)
+    public async Task<InlineKeyboardMarkup> CreateKeyboard(AssetType assetType, bool firstStep = false)
     {
-        var keyboard = new InlineKeyboardMarkup(new[]
+        InlineKeyboardMarkup keyboard;
+        
+        if (firstStep)
+        {
+            keyboard = new InlineKeyboardMarkup(new[]
+            {
+                await buttonCreator.AssembleChoiceButtons(assetType.Type),
+            });
+            return keyboard;
+        }
+        
+        keyboard = new InlineKeyboardMarkup(new[]
         {
             await buttonCreator.AssembleChoiceButtons(assetType.Type),
             new[]
@@ -18,7 +29,6 @@ public class AssetChoiceKeyboard(ButtonCreator buttonCreator)
                     callbackData: CallbackList.Cancel)
             }
         });
-
         return keyboard;
     }
 }

@@ -7,13 +7,15 @@ public class AddElementToCard : CardCreatorBase
 {
     private readonly CardOperator _cardOperator;
     private readonly RequestMedia _requestMedia;
+    private readonly CompleteAndSendCard _completeAndSendCard;
 
     public AddElementToCard(ILogger<AddElementToCard> logger, 
-        CardOperator cardOperator , RequestMedia requestMedia) : 
+        CardOperator cardOperator , RequestMedia requestMedia, CompleteAndSendCard completeAndSendCard) : 
         base(logger, cardOperator)
     {
         _cardOperator = cardOperator;
         _requestMedia = requestMedia;
+        _completeAndSendCard = completeAndSendCard;
     }
 
     protected override async Task Handle(Card card, CallbackQuery? query)
@@ -26,9 +28,14 @@ public class AddElementToCard : CardCreatorBase
         card.CreationSteps.Add(mediaTypeAndId);
 
         await _cardOperator.UpdateCard(card);
-
-        var test = card.CreationSteps;
         
-        NextTask = _requestMedia;
+        if (card.Step < card.AssetTypes.Count)
+        {
+            NextTask = _requestMedia;
+        }
+        else
+        {
+            NextTask = _completeAndSendCard;
+        }
     }
 }

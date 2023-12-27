@@ -3,7 +3,7 @@ using DTR_postcard_bot.DataLayer;
 namespace DTR_postcard_bot.BusinessLogic.CardCreator;
 
 public class StartCardCreation(ILogger<StartCardCreation> logger,
-    CardOperator cardOperator,
+    CardOperator cardOperator, AssetTypeOperator assetTypeOperator,
     RequestMedia requestMedia)
 {
     public async Task Handle(CallbackQuery query)
@@ -12,7 +12,8 @@ public class StartCardCreation(ILogger<StartCardCreation> logger,
 
         if(await cardOperator.CheckIfExist(query.From.Id)) return;
 
-        await cardOperator.RegisterNewCard(query.From.Id, query.Message.MessageId);
+        var assetTypes = await assetTypeOperator.GetAllAssetTypes();
+        await cardOperator.RegisterNewCard(query.From.Id, query.Message.MessageId, assetTypes);
         
         await requestMedia.Execute(query: query);
     }

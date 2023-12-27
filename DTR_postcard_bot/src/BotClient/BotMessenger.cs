@@ -42,32 +42,6 @@ public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> lo
         }
     }
     
-    public async Task UpdateMessageAsync(long chatId, string text, int messageId)
-    {
-        try
-        {
-            var message = await botClient.EditMessageTextAsync(text: text, chatId: chatId, messageId: messageId);
-        }
-        catch (Exception e)
-        {
-            logger.LogError("Error trying to update message in {ChatId}, {MessageId}, produced {Exception}", chatId, messageId, e);
-            throw;
-        }
-    }
-    
-    public async Task UpdateMessageAsync(long chatId, string text, int messageId, InlineKeyboardMarkup keyboardMarkup)
-    {
-        try
-        {
-            await botClient.EditMessageTextAsync(text: text, chatId: chatId, messageId: messageId, replyMarkup: keyboardMarkup);
-        }
-        catch (Exception e)
-        {
-            logger.LogError("Error trying to update message in {ChatId}, {MessageId}, produced {Exception}", chatId, messageId, e);
-            throw;
-        }
-    }
-
     public async Task DeleteMessageAsync(long chatId, int messageId)
     {
         try

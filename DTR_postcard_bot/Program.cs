@@ -100,6 +100,7 @@ class Program
         collection.AddTransient<StartCardCreation>();
         collection.AddTransient<CancelCardCreation>();
         collection.AddTransient<RequestMedia>();
+        collection.AddTransient<CompleteAndSendCard>();
   
         // Texts
         collection.AddTransient<TextContent>();
