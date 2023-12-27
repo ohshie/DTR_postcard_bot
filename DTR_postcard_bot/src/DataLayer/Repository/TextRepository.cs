@@ -35,6 +35,12 @@ public class TextRepository(PostcardDbContext dbContext) : IRepository<Text>
         await dbContext.SaveChangesAsync();
     }
 
+    public async Task BatchUpdate(IEnumerable<Text> entities)
+    {
+        dbContext.Texts.UpdateRange(entities);
+        await dbContext.SaveChangesAsync();
+    }
+
     public async Task Remove(Text text)
     {
         dbContext.Texts.Remove(text);

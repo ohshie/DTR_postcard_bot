@@ -40,6 +40,12 @@ public class AssetTypeRepository(PostcardDbContext dbContext) : IRepository<Asse
         await dbContext.SaveChangesAsync();
     }
 
+    public async Task BatchUpdate(IEnumerable<AssetType> entities)
+    {
+        dbContext.AssetTypes.UpdateRange(entities);
+        await dbContext.SaveChangesAsync();
+    }
+
     public async Task Remove(AssetType entity)
     {
         dbContext.Remove(entity);

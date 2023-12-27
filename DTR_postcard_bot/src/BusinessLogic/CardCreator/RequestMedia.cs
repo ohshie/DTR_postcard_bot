@@ -3,6 +3,7 @@ using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DataLayer.Repository;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator;
@@ -15,6 +16,7 @@ public class RequestMedia : CardCreatorBase
     private readonly AssetChoiceKeyboard _assetChoiceKeyboard;
     private readonly IMediaBatchHandler _mediaBatchHandler;
     private readonly TextAssetHandler _textAssetHandler;
+    private readonly AssetOperator _assetOperator;
 
     string _newMessageText = string.Empty;
     InlineKeyboardMarkup _keyboardMarkup;
@@ -27,7 +29,8 @@ public class RequestMedia : CardCreatorBase
         TextContent textContent, 
         AssetChoiceKeyboard assetChoiceKeyboard,
         IMediaBatchHandler mediaBatchHandler,
-        TextAssetHandler textAssetHandler) : base(logger, cardOperator)
+        TextAssetHandler textAssetHandler,
+        AssetOperator assetOperator) : base(logger, cardOperator)
     {
         _cardOperator = cardOperator;
         _botMessenger = botMessenger;
@@ -35,6 +38,7 @@ public class RequestMedia : CardCreatorBase
         _assetChoiceKeyboard = assetChoiceKeyboard;
         _mediaBatchHandler = mediaBatchHandler;
         _textAssetHandler = textAssetHandler;
+        _assetOperator = assetOperator;
     }
 
     protected override async Task Handle(Card card, CallbackQuery? query)
@@ -81,14 +85,24 @@ public class RequestMedia : CardCreatorBase
     {
         if (_requestedAssetType.Type != "text")
         {
-            _mediaContent = await _mediaBatchHandler.PrepareBatch(_requestedAssetType);
+            var (tgFileIdExist, _mediaContent) = await _mediaBatchHandler.PrepareBatch(_requestedAssetType);
             
-            var newMessagesId = await _botMessenger.SendNewMediaGroupMessage(chatId: chatId,
+            var sentMessagesList = await _botMessenger.SendNewMediaGroupMessage(chatId: chatId,
                 text: _newMessageText,
                 keyboardMarkup: _keyboardMarkup,
                 media: _mediaContent);
         
-            card.BotMessagesList = newMessagesId.Select(m => m.MessageId).ToList();
+            card.BotMessagesList = sentMessagesList.Select(m => m.MessageId).ToList();
+
+            if (!tgFileIdExist)
+            {
+                var fileIds = sentMessagesList
+                    .Where(messages => messages.Photo is not null)
+                    .Select(m => m.Photo.Last())
+                    .Select(ps => ps.FileId).ToArray();
+
+                await _assetOperator.WriteTelegramFileIds(fileIds, _requestedAssetType.Type);
+            }
         }
         else
         {
@@ -98,7 +112,8 @@ public class RequestMedia : CardCreatorBase
                 text: assetsText,
                 keyboardMarkup: _keyboardMarkup);
 
-            card.BotMessagesList = new List<int>() { message.MessageId };
+            card.BotMessagesList = new List<int>
+                { message.MessageId };
         }
     }
 }

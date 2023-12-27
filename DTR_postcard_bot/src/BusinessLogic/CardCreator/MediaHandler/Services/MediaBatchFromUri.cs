@@ -5,13 +5,15 @@ namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
 
 public class MediaBatchFromUri(AssetOperator assetOperator) : IMediaBatchHandler
 {
-    public async Task<IEnumerable<InputMediaPhoto>> PrepareBatch(AssetType assetType)
+    public async Task<(bool, IEnumerable<InputMediaPhoto>)> PrepareBatch(AssetType assetType)
     {
         var allRequiredAssets = await assetOperator.GetAssetsByType(assetType.Type);
 
         var inputMediaPhotos = AssembleBatch(allRequiredAssets);
 
-        return inputMediaPhotos;
+        var tgFileIdExist = string.IsNullOrEmpty(allRequiredAssets.Select(a => a.TelegramFileId).FirstOrDefault());
+
+        return (tgFileIdExist, inputMediaPhotos);
     }
 
     private IEnumerable<InputMediaPhoto> AssembleBatch(IEnumerable<Asset> assets)

@@ -51,4 +51,27 @@ public class AssetOperator(IRepository<Asset> repository,
         var assets = await repository.GetAll();
         await repository.BatchRemove(assets);
     }
+
+    public async Task WriteTelegramFileIds(IEnumerable<string> fileIds, string assetType)
+    {
+        var assetsSortedByTypes = (await repository.GetAll())
+            .Where(a => a.Type.Type == assetType && a.DisplayAsset)
+            .ToArray();
+
+        if (!string.IsNullOrEmpty(assetsSortedByTypes
+                .Select(a => a.TelegramFileId)
+                .FirstOrDefault())) return;
+
+        if (assetsSortedByTypes.Length != fileIds.Count()) return;
+
+        var indexer = 0;
+        
+        foreach (var fileId in fileIds)
+        {
+            assetsSortedByTypes[indexer].TelegramFileId = fileId;
+            indexer++;
+        }
+
+        await repository.BatchUpdate(assetsSortedByTypes);
+    }
 }

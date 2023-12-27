@@ -39,6 +39,12 @@ public class CardRepository(PostcardDbContext dbContext) : IRepository<Card>
         await dbContext.SaveChangesAsync();
     }
 
+    public async Task BatchUpdate(IEnumerable<Card> entities)
+    {
+       dbContext.Cards.UpdateRange(entities);
+       await dbContext.SaveChangesAsync();
+    }
+
     public async Task Remove(Card id)
     {
         dbContext.Cards.Remove(id);
