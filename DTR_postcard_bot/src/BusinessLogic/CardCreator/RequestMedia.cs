@@ -1,9 +1,7 @@
 using DTR_postcard_bot.BotClient;
 using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
-using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.MediaBatchHandler;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
-using DTR_postcard_bot.BusinessLogic.TextContent;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -15,7 +13,7 @@ public class RequestMedia : CardCreatorBase
     private readonly CardOperator _cardOperator;
     private readonly AssetTypeOperator _assetTypeOperator;
     private readonly BotMessenger _botMessenger;
-    private readonly ITextContent _textContent;
+    private readonly TextContent _textContent;
     private readonly AssetChoiceKeyboard _assetChoiceKeyboard;
     private readonly IMediaBatchHandler _mediaBatchHandler;
     private readonly AssembleMediaIntoCard _assembleMediaIntoCard;
@@ -31,7 +29,7 @@ public class RequestMedia : CardCreatorBase
         CardOperator cardOperator, 
         AssetTypeOperator assetTypeOperator,
         BotMessenger botMessenger,
-        ITextContent textContent, 
+        TextContent textContent, 
         AssetChoiceKeyboard assetChoiceKeyboard,
         IMediaBatchHandler mediaBatchHandler,
         AssembleMediaIntoCard assembleMediaIntoCard,
@@ -61,7 +59,7 @@ public class RequestMedia : CardCreatorBase
 
             await _botMessenger.SendNewMediaMessage(card.UserId,
                 filePath: createdFile,
-                text: _textContent.CompleteMessage(),
+                text: await _textContent.GetRequiredText("completeMessage"),
                 keyboardMarkup: _cardCreationKeyboard.CreateKeyboard(false));
 
             await _cardOperator.RemoveCard(card);
@@ -78,13 +76,13 @@ public class RequestMedia : CardCreatorBase
             
             await _botMessenger.DeleteMessageAsync(card.UserId, lastBotMessageId);
             
-            _newMessageText = _textContent.FirstSelectMessage(_requestedAssetType.Text);
+            _newMessageText = await _textContent.GetRequiredText("firstSelectMessage", _requestedAssetType.Text);
         }
         else
         {
             _requestedAssetType = assetTypes.ElementAtOrDefault(card.Step-1);
             
-            _newMessageText = _textContent.RequestSomething(_requestedAssetType.Text);
+            _newMessageText = await _textContent.GetRequiredText("requestSomething", _requestedAssetType.Text);
 
             await _botMessenger.DeleteMessageRangeAsync(card.UserId, card.BotMessagesList);
         }

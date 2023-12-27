@@ -1,12 +1,11 @@
-﻿using DTR_postcard_bot.AssetManager;
+﻿using DTR_postcard_bot;
+using DTR_postcard_bot.AssetManager;
 using DTR_postcard_bot.BotClient;
 using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BotClient.Keyboards.Buttons;
 using DTR_postcard_bot.BusinessLogic.CardCreator;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
-using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.MediaBatchHandler;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
-using DTR_postcard_bot.BusinessLogic.TextContent;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.DbContext;
 using DTR_postcard_bot.DataLayer.Models;
@@ -101,11 +100,9 @@ class Program
         collection.AddTransient<StartCardCreation>();
         collection.AddTransient<CancelCardCreation>();
         collection.AddTransient<RequestMedia>();
-        
-        // Image Processor
-        
+  
         // Texts
-        collection.AddTransient<ITextContent, MzkTextContent>();
+        collection.AddTransient<TextContent>();
     }
 }
 

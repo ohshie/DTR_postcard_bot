@@ -1,10 +1,9 @@
 using DTR_postcard_bot.BotClient.Keyboards;
-using DTR_postcard_bot.BusinessLogic.TextContent;
 
 namespace DTR_postcard_bot.BotClient;
 
 public class BotGreetMessage(ITelegramBotClient botClient, 
-    ITextContent textContent, 
+    TextContent textContent, 
     CardCreationKeyboard cardCreationKeyboard, BotMessenger botMessenger)
 {
     public async Task Send(Message message)
@@ -12,7 +11,7 @@ public class BotGreetMessage(ITelegramBotClient botClient,
         if (message.Text!.StartsWith("/start"))
         {
             await botClient.SendTextMessageAsync(message.Chat.Id, 
-                text: textContent.GreetingsMessage(), 
+                text: await textContent.GetRequiredText("greetingsMessage"), 
                 replyMarkup: cardCreationKeyboard.CreateKeyboard());
         }
     }
@@ -20,7 +19,7 @@ public class BotGreetMessage(ITelegramBotClient botClient,
     public async Task Send(long chatId)
     {
         await botClient.SendTextMessageAsync(chatId: chatId,
-            textContent.GreetingsMessage(),
+            text: await textContent.GetRequiredText("greetingsMessage"),
             replyMarkup: cardCreationKeyboard.CreateKeyboard());
     }
 }
