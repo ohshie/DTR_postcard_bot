@@ -59,10 +59,8 @@ public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> lo
     {
         try
         {
-            foreach (var messageId in messagesId)
-            {
-                await botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId);
-            }
+            await Task.WhenAll(messagesId.Select(messageId =>
+                botClient.DeleteMessageAsync(chatId: chatId, messageId: messageId)));
         }
         catch (Exception e)
         {
