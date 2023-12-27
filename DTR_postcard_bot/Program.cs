@@ -73,10 +73,13 @@ class Program
         collection.AddTransient<AssetOperator>();
         collection.AddTransient<AssetTypeOperator>();
         collection.AddTransient<TextOperator>();
+        collection.AddTransient<StatOperator>();
+        
         collection.AddTransient<IRepository<Card>, CardRepository>();
         collection.AddTransient<IRepository<Asset>, AssetRepository>();
         collection.AddTransient<IRepository<AssetType>, AssetTypeRepository>();
         collection.AddTransient<IRepository<Text>, TextRepository>();
+        collection.AddTransient<IRepository<Stat>, StatRepository>();
         
         // Bot client
         collection.AddTransient<BotClient>();
