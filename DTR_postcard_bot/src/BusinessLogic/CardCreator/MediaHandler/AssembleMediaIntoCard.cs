@@ -32,11 +32,16 @@ public class AssembleMediaIntoCard(AssetOperator assetOperator)
 
     private async Task<Image> LoadImages(string type, long id)
     {
-        var assetName = await assetOperator.Get(id);
+        var asset = await assetOperator.Get(id);
+        if (asset is null)
+        {
+            var assetsByType = await assetOperator.GetAssetsByType(type);
+            asset = assetsByType.FirstOrDefault();
+        }
         
         var pathToAsset = Helpers.PathBuilder(folderType: _assetsFolderName,
             subfolder: type, 
-            fileName: assetName.FileName);
+            fileName: asset.FileName);
 
         return await Image.LoadAsync(pathToAsset);
     }

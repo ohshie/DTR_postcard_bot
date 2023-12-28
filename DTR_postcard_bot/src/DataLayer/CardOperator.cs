@@ -82,4 +82,10 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
         logger.LogInformation("Updating {UserId} card entry", card.UserId);
         await repository.Update(card);
     }
+
+    public async Task RemoveAllCards()
+    {
+        var cards = await repository.GetAll();
+        await repository.BatchRemove(cards);
+    }
 }

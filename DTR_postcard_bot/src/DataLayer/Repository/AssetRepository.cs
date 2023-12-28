@@ -51,5 +51,9 @@ public class AssetRepository(PostcardDbContext dbContext) : IRepository<Asset>
     {
         dbContext.Assets.RemoveRange(entities);
         await dbContext.SaveChangesAsync();
+        
+        await dbContext.Database.ExecuteSqlRawAsync("UPDATE sqlite_sequence " +
+                                                    "SET seq = 0 " +
+                                                    "WHERE name = 'Assets'");
     }
 }

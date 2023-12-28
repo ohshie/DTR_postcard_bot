@@ -27,7 +27,7 @@ public abstract class CardCreatorBase
         
         var card = await _cardOperator.GetCard(query.From.Id);
 
-        if (card is null || !card.CardCreationInProcess)
+        if (card is null)
         {
             card = await _startCardCreation.Handle(query, card);
         }

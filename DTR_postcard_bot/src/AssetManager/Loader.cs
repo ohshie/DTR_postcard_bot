@@ -22,7 +22,6 @@ public class Loader(AssetCleaner cleaner,
         var dataTypes = GetRequiredDataTypes().ToArray();
         
         await LoadAssets(dataTypes);
-        await UpdateCardsInProcess();
         await LoadTexts(dataTypes);
     }
 
@@ -36,24 +35,11 @@ public class Loader(AssetCleaner cleaner,
     private async Task LoadAssets(IEnumerable<IConfigurationSection> dataTypes)
     {
         var assetsJDoc = LoadJson(dataTypes, "PathToAssetJson");
-
+        
         await assetTypeLoader.Load(assetsJDoc);
         await assetLoader.Load(assetsJDoc);
     }
-
-    private async Task UpdateCardsInProcess()
-    {
-        var allCurrentCards = await cardOperator.GetAll();
-        var cardsArray = allCurrentCards.ToArray();
-        
-        foreach (var card in cardsArray)
-        {
-            card.CardCreationInProcess = false;
-        }
-
-        await cardOperator.UpdateBatch(cardsArray);
-    }
-
+    
     private IEnumerable<IConfigurationSection> GetRequiredDataTypes()
     {
         var dataTypes = configuration.GetSection("RequiredData").GetChildren();
