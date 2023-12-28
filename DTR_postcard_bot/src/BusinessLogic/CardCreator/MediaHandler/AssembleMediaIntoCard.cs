@@ -33,6 +33,7 @@ public class AssembleMediaIntoCard(AssetOperator assetOperator)
     private async Task<Image> LoadImages(string type, long id)
     {
         var asset = await assetOperator.Get(id);
+        
         if (asset is null)
         {
             var assetsByType = await assetOperator.GetAssetsByType(type);

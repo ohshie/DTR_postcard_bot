@@ -7,19 +7,10 @@ namespace DTR_postcard_bot.BusinessLogic.CardCreator;
 public class StartCardCreation(ILogger<StartCardCreation> logger,
     CardOperator cardOperator,
     AssetTypeOperator assetTypeOperator,
-    StatOperator statOperator,
-    BotMessenger botMessenger)
+    StatOperator statOperator)
 {
     public async Task<Card> Handle(CallbackQuery query, Card? card = null)
     {
-        if (card is not null)
-        { 
-            logger.LogInformation("Removing traces of an old card {UserId}", query.From.Id);
-            
-            await botMessenger.DeleteMessageRangeAsync(card.UserId, card.BotMessagesList);
-            await cardOperator.RemoveCard(card);
-        }
-        
         logger.LogInformation("Registering new Card creation for UserId {UserId}", query.From.Id);
         
         var assetTypes = await assetTypeOperator.GetAllAssetTypes();
