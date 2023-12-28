@@ -10,7 +10,6 @@ public static class Helpers
         {
             path = new[] 
             { 
-                AppDomain.CurrentDomain.BaseDirectory, 
                 "app",
                 "data",
                 folderType, 
@@ -22,7 +21,6 @@ public static class Helpers
         {
             path = new[] 
             { 
-                AppDomain.CurrentDomain.BaseDirectory, 
                 "app",
                 "data",
                 folderType, 

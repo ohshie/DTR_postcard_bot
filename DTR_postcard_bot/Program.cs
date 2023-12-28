@@ -24,13 +24,16 @@ class Program
 
         using (host)
         {
-            var dbContext = host.Services.GetRequiredService<PostcardDbContext>();
+            using var scope = host.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            
+            var dbContext = services.GetRequiredService<PostcardDbContext>();
             await dbContext.Database.EnsureCreatedAsync();
             
-            var loader = host.Services.GetRequiredService<Loader>();
+            var loader = services.GetRequiredService<Loader>();
             await loader.Execute();
             
-            var botClient = host.Services.GetRequiredService<BotClient>();
+            var botClient = services.GetRequiredService<BotClient>();
             await botClient.BotOperations();
 
             await host.WaitForShutdownAsync();
@@ -57,11 +60,11 @@ class Program
         });
         
         // Asset Manager
-        collection.AddSingleton<Loader>();
-        collection.AddSingleton<AssetCleaner>();
-        collection.AddSingleton<AssetTypeLoader>();
-        collection.AddSingleton<AssetLoader>();
-        collection.AddSingleton<TextLoader>();
+        collection.AddTransient<Loader>();
+        collection.AddTransient<AssetCleaner>();
+        collection.AddTransient<AssetTypeLoader>();
+        collection.AddTransient<AssetLoader>();
+        collection.AddTransient<TextLoader>();
 
         // Data Layer
         collection.AddDbContext<PostcardDbContext>(s =>
