@@ -42,6 +42,11 @@ class Program
 
     private static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((_, builder) =>
+            {
+                builder.SetBasePath("/app/app/")
+                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            })
             .UseSerilog((_, configuration) =>
             {
                 configuration
