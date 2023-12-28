@@ -15,7 +15,7 @@ public class StatOperator(IRepository<Stat> repository, ILogger<StatOperator> lo
             var newStat = new Stat()
             {
                 UserId = id,
-                UserName = name
+                UserName = string.IsNullOrEmpty(name) ? "Anonymous" : name
             };
 
             await repository.Add(newStat);

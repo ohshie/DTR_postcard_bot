@@ -50,7 +50,7 @@ class Program
             .UseSerilog((_, configuration) =>
             {
                 configuration
-                    .MinimumLevel.Information()
+                    .MinimumLevel.Warning()
                     .Enrich.FromLogContext()
                     .WriteTo.Console();
             })
