@@ -5,23 +5,12 @@ namespace DTR_postcard_bot.DataLayer;
 
 public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> logger)
 {
-    public async Task<Card> FetchCard(long userId)
+    public async Task<Card?> GetCard(long userId)
     {
-        try
-        {
-            var card = await GetCard(userId);
-            return card;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-    }
-
-    private async Task<Card> GetCard(long userId)
-    {
+        logger.LogInformation("Getting {UserId} incomplete Card", userId);
+        
         var card = await repository.Get(userId);
+        
         return card;
     }
     
@@ -29,6 +18,7 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
     {
         try
         {
+            logger.LogInformation("Registering new card for {UserId} incomplete Card", userId);
             Card card = new()
             {
                 UserId = userId,
@@ -52,13 +42,11 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
     {
         try
         {
-            var cardInfo = await GetCard(userId);
-            if (cardInfo is null)
-            {
-                return false;
-            }
-
-            return true;
+            logger.LogInformation("Checking if {UserId} is currently creating card", userId);
+            
+            var cardExist = await repository.Get(userId);
+            
+            return cardExist is not null;
         }
         catch (Exception e)
         {
@@ -69,27 +57,13 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
 
     public async Task RemoveCard(Card card)
     {
-        try
-        {
-            await repository.Remove(card);
-        }
-        catch (Exception e)
-        {
-            logger.LogError("Error removing entry from db. ChatId: {ChatId}, error {Exception}", card.UserId, e);
-            throw;
-        }
+        logger.LogInformation("Removing user {UserId} card entry", card.UserId);
+        await repository.Remove(card);
     }
 
     public async Task UpdateCard(Card card)
     {
-        try
-        {
-            await repository.Update(card);
-        }
-        catch (Exception e)
-        {
-            logger.LogError("Error updating entry in db. ChatId: {ChatId}, error {Exception}", card.UserId, e);
-            throw;
-        }
+        logger.LogInformation("Updating {UserId} card entry", card.UserId);
+        await repository.Update(card);
     }
 }

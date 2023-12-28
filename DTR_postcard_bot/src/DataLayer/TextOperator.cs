@@ -1,11 +1,12 @@
 using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DataLayer.Repository;
 using Microsoft.EntityFrameworkCore;
 
-namespace DTR_postcard_bot.DataLayer.Repository;
+namespace DTR_postcard_bot.DataLayer;
 
-public class TextOperator(IRepository<Text> repository, ILogger<TextOperator> logger)
+public class TextOperator(IRepository<Text> repository)
 {
-    public async Task<Text> GetRequiredText(string trigger)
+    public async Task<Text?> GetRequiredText(string trigger)
     {
         var text = await repository.GetAll();
         return await text.FirstOrDefaultAsync(t => t.Trigger == trigger);

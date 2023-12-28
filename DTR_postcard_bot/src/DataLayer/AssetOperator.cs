@@ -1,11 +1,10 @@
 using DTR_postcard_bot.DataLayer.Models;
-using Microsoft.Extensions.Configuration;
+using DTR_postcard_bot.DataLayer.Repository;
 
-namespace DTR_postcard_bot.DataLayer.Repository;
+namespace DTR_postcard_bot.DataLayer;
 
 public class AssetOperator(IRepository<Asset> repository, 
-    ILogger<AssetOperator> logger,
-    IConfiguration configuration)
+    ILogger<AssetOperator> logger)
 {
     public async Task<Asset> Get(long id)
     {
@@ -13,31 +12,15 @@ public class AssetOperator(IRepository<Asset> repository,
         return requestedAsset;
     }
     
-    public async Task<List<Asset>> GetAllAssets()
-    {
-        var assetList = await repository.GetAll() as List<Asset>;
-
-        if (assetList is not null && assetList.Any())
-        {
-            var test = assetList.Where(a => a.Channel == configuration.GetSection("ChannelTag").Value);
-            return assetList;
-        }
-        
-        assetList = new();
-        return assetList;
-    }
-    
     public async Task<IEnumerable<Asset>> GetAssetsByType(string type)
     {
-        var assets = await repository.GetAll() as IEnumerable<Asset>;
+        logger.LogInformation("Retrieving assets sorted by {AssetType}", type);
+
+        var assets = await repository.GetAll();
+
+        if (!assets.Any()) return new List<Asset>();
         
-        if (assets.Any())
-        {
-            var soreted = assets.Where(a => a.Type.Type == type);
-            return soreted;
-        }
-        
-        return new List<Asset>();
+        return assets.Where(a => a.Type!.Type == type);
     }
 
     public async Task AddBatchAssets(List<Asset> assets)
@@ -54,19 +37,23 @@ public class AssetOperator(IRepository<Asset> repository,
 
     public async Task WriteTelegramFileIds(IEnumerable<string> fileIds, string assetType)
     {
+        logger.LogInformation("Adding telegram Id's to assets of type: {AssetType}",assetType);
+        
         var assetsSortedByTypes = (await repository.GetAll())
-            .Where(a => a.Type.Type == assetType && a.DisplayAsset)
+            .Where(a => a.Type!.Type == assetType && a.DisplayAsset)
             .ToArray();
 
         if (!string.IsNullOrEmpty(assetsSortedByTypes
                 .Select(a => a.TelegramFileId)
                 .FirstOrDefault())) return;
 
-        if (assetsSortedByTypes.Length != fileIds.Count()) return;
+        var fileIdArray = fileIds.ToArray();
+        
+        if (assetsSortedByTypes.Length != fileIdArray.Length) return;
 
         var indexer = 0;
         
-        foreach (var fileId in fileIds)
+        foreach (var fileId in fileIdArray)
         {
             assetsSortedByTypes[indexer].TelegramFileId = fileId;
             indexer++;

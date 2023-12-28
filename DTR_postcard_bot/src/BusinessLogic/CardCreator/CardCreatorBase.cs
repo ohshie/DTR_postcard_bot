@@ -8,7 +8,7 @@ public abstract class CardCreatorBase
     private readonly ILogger<CardCreatorBase> _logger;
     private readonly CardOperator _cardOperator;
 
-    protected CardCreatorBase NextTask;
+    protected CardCreatorBase? NextTask;
 
     protected CardCreatorBase( 
         ILogger<CardCreatorBase> logger, 
@@ -22,7 +22,7 @@ public abstract class CardCreatorBase
     { 
         _logger.LogInformation("Processing {UserId} query {QueryType}", query.From.Id, query.Data);
         
-        var card = await _cardOperator.FetchCard(query.From.Id);
+        var card = await _cardOperator.GetCard(query.From.Id);
         if(card is null) return;
 
         await Handle(card, query);
