@@ -27,6 +27,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile
+          file: ./DTR_postcard_bot/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/mzk_postcard_bot:latest
