@@ -50,7 +50,7 @@ class Program
             .UseSerilog((_, configuration) =>
             {
                 configuration
-                    .MinimumLevel.Warning()
+                    .MinimumLevel.Information()
                     .Enrich.FromLogContext()
                     .WriteTo.Console();
             })
@@ -58,7 +58,7 @@ class Program
 
     private static void ConfigureServices(HostBuilderContext context, IServiceCollection collection)
     {
-        collection.AddSingleton<ITelegramBotClient>(_ =>
+        collection.AddScoped<ITelegramBotClient>(_ =>
         {
             var token = context.Configuration.GetSection("BotToken").GetValue<string>("BotToken");
             return new TelegramBotClient(token!);

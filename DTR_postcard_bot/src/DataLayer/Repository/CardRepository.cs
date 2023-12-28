@@ -8,12 +8,14 @@ public class CardRepository(PostcardDbContext dbContext) : IRepository<Card>
 {
     public async Task<Card> Get(long id)
     {
-        return await dbContext.Cards.FirstOrDefaultAsync(c => c.UserId == id);
+        return await dbContext.Cards
+            .FirstOrDefaultAsync(c => c.UserId == id);
     }
 
     public async Task<IQueryable<Card>> GetAll()
     {
-        return dbContext.Cards.AsQueryable();
+        return dbContext.Cards
+            .AsQueryable();
     }
 
     public async Task<IEnumerable<Card>> GetAll(int id)

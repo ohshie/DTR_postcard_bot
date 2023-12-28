@@ -7,15 +7,18 @@ public abstract class CardCreatorBase
 {
     private readonly ILogger<CardCreatorBase> _logger;
     private readonly CardOperator _cardOperator;
+    private readonly StartCardCreation _startCardCreation;
 
     protected CardCreatorBase? NextTask;
 
     protected CardCreatorBase( 
         ILogger<CardCreatorBase> logger, 
-        CardOperator cardOperator)
+        CardOperator cardOperator,
+        StartCardCreation startCardCreation)
     {
         _logger = logger;
         _cardOperator = cardOperator;
+        _startCardCreation = startCardCreation;
     }
     
     public async Task Execute(CallbackQuery query)
@@ -23,7 +26,11 @@ public abstract class CardCreatorBase
         _logger.LogInformation("Processing {UserId} query {QueryType}", query.From.Id, query.Data);
         
         var card = await _cardOperator.GetCard(query.From.Id);
-        if(card is null) return;
+
+        if (card is null || !card.CardCreationInProcess)
+        {
+            card = await _startCardCreation.Handle(query, card);
+        }
 
         await Handle(card, query);
         

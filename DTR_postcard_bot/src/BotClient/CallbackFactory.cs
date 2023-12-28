@@ -2,15 +2,15 @@ using DTR_postcard_bot.BusinessLogic.CardCreator;
 
 namespace DTR_postcard_bot.BotClient;
 
-public class CallbackFactory(StartCardCreation startCardCreation,
+public class CallbackFactory(RequestMedia requestMedia,
     CancelCardCreation cancelCardCreation, AddElementToCard addElementToCard)
 {
     private readonly Dictionary<string, Func<CallbackQuery, Task>> _botTaskFactory = new()
     {
-        { CallbackList.StartCardCreation, startCardCreation.Handle },
+        { CallbackList.StartCardCreation, requestMedia.Execute },
         { CallbackList.Cancel, cancelCardCreation.Execute },
         { CallbackList.Add, addElementToCard.Execute },
-        { CallbackList.CreateNew, startCardCreation.Handle }
+        { CallbackList.CreateNew, requestMedia.Execute }
     };
     
     public async Task CallBackDataManager(CallbackQuery query)

@@ -38,17 +38,17 @@ public class BotClient(ITelegramBotClient botClient,
     
     async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        logger.LogWarning("Handling update {Update} type {Type} from", update.Id, update.Type);
-        
         if (update.CallbackQuery is { } callbackQuery)
         {
+            logger.LogWarning("Handling update {Update} type {Type} from {UserId}", callbackQuery.Id, update.Type, callbackQuery.From.Id);
             await callbackFactory.CallBackDataManager(callbackQuery);
             return;
         }
 
-        if (update.Message is not null)
+        if (update.Message is { } message)
         {
-            await botGreetMessage.Send(update.Message);
+            logger.LogWarning("Handling update {Update} type {Type} from {UserId}", message.MessageId, update.Type, message.From.Id);
+            await botGreetMessage.Send(message);
         }
     }
     

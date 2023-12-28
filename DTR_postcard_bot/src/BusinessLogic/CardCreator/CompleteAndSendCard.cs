@@ -22,7 +22,9 @@ public class CompleteAndSendCard : CardCreatorBase
         AssembleMediaIntoCard assembleMediaIntoCard,
         BotMessenger botMessenger,
         TextContent textContent,
-        CardCreationKeyboard creationKeyboard, StatOperator statOperator) : base(logger, cardOperator)
+        CardCreationKeyboard creationKeyboard, 
+        StatOperator statOperator,
+        StartCardCreation startCardCreation) : base(logger, cardOperator, startCardCreation)
     {
         _cardOperator = cardOperator;
         _assembleMediaIntoCard = assembleMediaIntoCard;

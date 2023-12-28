@@ -7,8 +7,9 @@ namespace DTR_postcard_bot.BusinessLogic.CardCreator;
 public class CancelCardCreation(ILogger<CancelCardCreation> logger, 
         CardOperator cardOperator, 
         BotMessenger messenger, 
-        BotGreetMessage botGreetMessage)
-    : CardCreatorBase(logger, cardOperator)
+        BotGreetMessage botGreetMessage,
+        StartCardCreation startCardCreation)
+    : CardCreatorBase(logger, cardOperator, startCardCreation)
 {
     private readonly ILogger<CardCreatorBase> _logger = logger;
 

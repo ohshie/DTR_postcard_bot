@@ -51,7 +51,6 @@ public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> lo
         catch (Exception e)
         {
             logger.LogError("Error trying to delete message in {ChatId}, {MessageId}, produced {Exception}", chatId, messageId, e);
-            throw;
         }
     }
 

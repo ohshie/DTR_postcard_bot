@@ -5,6 +5,11 @@ namespace DTR_postcard_bot.DataLayer;
 
 public class AssetTypeOperator(IRepository<AssetType> repository)
 {
+    public async Task<AssetType> GetById(int id)
+    {
+        return await repository.Get(id);
+    }
+    
     public async Task BatchCreateTypes(List<AssetType> assetTypes)
     {
         await repository.BatchAdd(assetTypes);

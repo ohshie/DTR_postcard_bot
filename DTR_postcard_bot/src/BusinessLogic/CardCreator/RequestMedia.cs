@@ -3,7 +3,6 @@ using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
-using DTR_postcard_bot.DataLayer.Repository;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator;
@@ -17,6 +16,7 @@ public class RequestMedia : CardCreatorBase
     private readonly IMediaBatchHandler _mediaBatchHandler;
     private readonly TextAssetHandler _textAssetHandler;
     private readonly AssetOperator _assetOperator;
+    private readonly AssetTypeOperator _assetTypeOperator;
 
     string _newMessageText = string.Empty;
     InlineKeyboardMarkup _keyboardMarkup;
@@ -30,7 +30,9 @@ public class RequestMedia : CardCreatorBase
         AssetChoiceKeyboard assetChoiceKeyboard,
         IMediaBatchHandler mediaBatchHandler,
         TextAssetHandler textAssetHandler,
-        AssetOperator assetOperator) : base(logger, cardOperator)
+        AssetOperator assetOperator,
+        AssetTypeOperator assetTypeOperator,
+        StartCardCreation startCardCreation) : base(logger, cardOperator, startCardCreation)
     {
         _cardOperator = cardOperator;
         _botMessenger = botMessenger;
@@ -39,12 +41,13 @@ public class RequestMedia : CardCreatorBase
         _mediaBatchHandler = mediaBatchHandler;
         _textAssetHandler = textAssetHandler;
         _assetOperator = assetOperator;
+        _assetTypeOperator = assetTypeOperator;
     }
 
     protected override async Task Handle(Card card, CallbackQuery? query)
     {
         card.Step++;
-
+            
         await ProcessRequest(card, query.Message.MessageId);
 
         if (card.Step == 1)
@@ -65,7 +68,7 @@ public class RequestMedia : CardCreatorBase
     {
         if (card.Step == 1)
         {
-            _requestedAssetType = card.AssetTypes.First();
+            _requestedAssetType = await _assetTypeOperator.GetById(card.AssetTypeIds.First());
             
             await _botMessenger.DeleteMessageAsync(card.UserId, messageId);
             
@@ -73,7 +76,7 @@ public class RequestMedia : CardCreatorBase
         }
         else
         {
-            _requestedAssetType = card.AssetTypes.ElementAtOrDefault(card.Step-1);
+            _requestedAssetType = await _assetTypeOperator.GetById(card.AssetTypeIds[card.Step-1]);
             
             _newMessageText = await _textContent.GetRequiredText("requestSomething", _requestedAssetType.Text);
 

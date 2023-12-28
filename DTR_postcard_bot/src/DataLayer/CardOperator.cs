@@ -7,18 +7,23 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
 {
     public async Task<Card?> GetCard(long userId)
     {
-        logger.LogInformation("Getting {UserId} incomplete Card", userId);
-        
         var card = await repository.Get(userId);
+        
+        if (card is not null) logger.LogInformation("Fetched {UserId} Card at step {CardStep}", card.UserId, card.Step);
+        else
+        {
+            logger.LogInformation("Failed to fetch card for {UserId}", userId);
+        }
         
         return card;
     }
     
-    public async Task RegisterNewCard(long userId, int lastMessageId, IEnumerable<AssetType> assetTypes)
+    public async Task<Card> RegisterNewCard(long userId, int lastMessageId, IEnumerable<AssetType> assetTypes)
     {
         try
         {
             logger.LogInformation("Registering new card for {UserId} incomplete Card", userId);
+            
             Card card = new()
             {
                 UserId = userId,
@@ -26,16 +31,27 @@ public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> lo
                 CreationSteps = new(),
                 CardCreationInProcess = true,
                 Step = 0,
-                AssetTypes = assetTypes.ToList()
+                AssetTypeIds = assetTypes.Select(at => at.Id).ToList()
             };
             
             await repository.Add(card);
+            return card;
         }
         catch (Exception e)
         {
             logger.LogError("Error creating new entry in db. ChatId: {ChatId}, error {Exception}", userId, e);
             throw;
         }
+    }
+
+    public async Task UpdateBatch(IEnumerable<Card> cards)
+    {
+        await repository.BatchUpdate(cards);
+    }
+
+    public async Task<IEnumerable<Card>> GetAll()
+    {
+        return await repository.GetAll();
     }
 
     public async Task<bool> CheckIfExist(long userId)

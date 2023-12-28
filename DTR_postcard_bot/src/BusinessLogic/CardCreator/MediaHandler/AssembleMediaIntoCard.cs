@@ -17,10 +17,10 @@ public class AssembleMediaIntoCard(AssetOperator assetOperator)
     public async Task<string> Handle(Card card)
     {
         List<Image> images = new();
-
-        foreach (var step in card.CreationSteps)
+        
+        foreach (var typeAndId in card.CreationSteps.DistinctBy(cs => cs.Split("").First())
+                     .Select(step => step.Split(" ")))
         {
-            var typeAndId = step.Split(" ");
             var asset = await LoadImages(typeAndId.First(), long.Parse(typeAndId.Last()));
             images.Add(asset);
         }
@@ -33,6 +33,7 @@ public class AssembleMediaIntoCard(AssetOperator assetOperator)
     private async Task<Image> LoadImages(string type, long id)
     {
         var assetName = await assetOperator.Get(id);
+        
         var pathToAsset = Helpers.PathBuilder(folderType: _assetsFolderName,
             subfolder: type, 
             fileName: assetName.FileName);

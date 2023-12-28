@@ -10,8 +10,9 @@ public class AddElementToCard : CardCreatorBase
     private readonly CompleteAndSendCard _completeAndSendCard;
 
     public AddElementToCard(ILogger<AddElementToCard> logger, 
-        CardOperator cardOperator , RequestMedia requestMedia, CompleteAndSendCard completeAndSendCard) : 
-        base(logger, cardOperator)
+        CardOperator cardOperator , RequestMedia requestMedia, CompleteAndSendCard completeAndSendCard,
+        StartCardCreation startCardCreation) : 
+        base(logger, cardOperator, startCardCreation)
     {
         _cardOperator = cardOperator;
         _requestMedia = requestMedia;
@@ -29,7 +30,7 @@ public class AddElementToCard : CardCreatorBase
 
         await _cardOperator.UpdateCard(card);
         
-        if (card.Step < card.AssetTypes.Count)
+        if (card.Step < card.AssetTypeIds.Count)
         {
             NextTask = _requestMedia;
         }
