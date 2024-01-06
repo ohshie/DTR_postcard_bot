@@ -1,5 +1,4 @@
 using Telegram.Bot.Types.ReplyMarkups;
-using File = System.IO.File;
 
 namespace DTR_postcard_bot.BotClient;
 
@@ -33,7 +32,7 @@ public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> lo
     public async Task SendNewMediaMessage(long chatId, string text, InlineKeyboardMarkup keyboardMarkup,
         string filePath)
     {
-        using (var stream = new FileStream(filePath, FileMode.Open))
+        await using (var stream = new FileStream(filePath, FileMode.Open))
         {
             await botClient.SendPhotoAsync(chatId,
                 photo: InputFile.FromStream(stream),
@@ -50,7 +49,7 @@ public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> lo
         }
         catch (Exception e)
         {
-            logger.LogError("Error trying to delete message in {ChatId}, {MessageId}, produced {Exception}", chatId, messageId, e);
+            logger.LogError("Error trying to delete message in {ChatId}, {MessageId}, produced {Exception}", chatId, messageId, e.Message);
         }
     }
 
@@ -63,7 +62,7 @@ public class BotMessenger(ITelegramBotClient botClient, ILogger<BotMessenger> lo
         }
         catch (Exception e)
         {
-            logger.LogError("Error trying to delete message in {ChatId}, produced {Exception}", chatId, e);
+            logger.LogError("Error trying to delete message in {ChatId}, produced {Exception}", chatId, e.Message);
             throw;
         }
     }

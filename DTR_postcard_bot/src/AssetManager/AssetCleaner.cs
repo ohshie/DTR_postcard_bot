@@ -1,11 +1,10 @@
 using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Repository;
 
 namespace DTR_postcard_bot.AssetManager;
 
 public class AssetCleaner(TextOperator textOperator, 
     AssetOperator assetOperator, 
-    AssetTypeOperator assetTypeOperator, CardOperator cardOperator,
+    AssetTypeOperator assetTypeOperator,
     ILogger<AssetCleaner> logger)
 {
     internal async Task Execute()

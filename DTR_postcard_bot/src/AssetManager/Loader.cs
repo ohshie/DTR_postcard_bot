@@ -1,6 +1,4 @@
 using System.Text.Json;
-using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Models;
 using Microsoft.Extensions.Configuration;
 using File = System.IO.File;
 
@@ -11,33 +9,41 @@ public class Loader(AssetCleaner cleaner,
     AssetLoader assetLoader, 
     AssetTypeLoader assetTypeLoader,
     TextLoader textLoader,
-    CardOperator cardOperator,
-    AssetTypeOperator assetTypeOperator,
     ILogger<Loader> logger)
 {
-    public async Task Execute()
+    public async Task<bool> Execute()
     {
+        logger.LogInformation("Initializing assets");
         await cleaner.Execute();
 
         var dataTypes = GetRequiredDataTypes().ToArray();
         
-        await LoadAssets(dataTypes);
-        await LoadTexts(dataTypes);
+        var assetsSuccess = await LoadAssets(dataTypes);
+        var textSuccess = await LoadTexts(dataTypes);
+
+        return assetsSuccess && textSuccess;
     }
 
-    private async Task LoadTexts(IEnumerable<IConfigurationSection> dataTypes)
+    private async Task<bool> LoadTexts(IEnumerable<IConfigurationSection> dataTypes)
     {
         var textJDoc = LoadJson(dataTypes, "PathToTextJson");
 
+        if (textJDoc is null) return false;
+
         await textLoader.Load(textJDoc);
+        return true;
     }
 
-    private async Task LoadAssets(IEnumerable<IConfigurationSection> dataTypes)
+    private async Task<bool> LoadAssets(IEnumerable<IConfigurationSection> dataTypes)
     {
         var assetsJDoc = LoadJson(dataTypes, "PathToAssetJson");
-        
+
+        if (assetsJDoc is null) return false;
+    
         await assetTypeLoader.Load(assetsJDoc);
         await assetLoader.Load(assetsJDoc);
+
+        return true;
     }
     
     private IEnumerable<IConfigurationSection> GetRequiredDataTypes()
@@ -47,14 +53,23 @@ public class Loader(AssetCleaner cleaner,
         return dataTypes;
     }
     
-    private JsonDocument LoadJson(IEnumerable<IConfigurationSection> dataTypes, string requestedType)
+    private JsonDocument? LoadJson(IEnumerable<IConfigurationSection> dataTypes, string requestedType)
     {
-        var pathToJson = dataTypes
-            .FirstOrDefault(dt => dt.Key == requestedType)
-            .Value;
+        try
+        {
+            var pathToJson = dataTypes
+                .FirstOrDefault(dt => dt.Key == requestedType)?
+                .Value;
+            if (string.IsNullOrEmpty(pathToJson)) return null;
+            
+            using var stream = File.OpenRead(pathToJson);
+            return JsonDocument.Parse(stream);
 
-        using var stream = File.OpenRead(pathToJson);
-        
-        return JsonDocument.Parse(stream);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Something went wrong when loading Assets JSON file {Exception}", e.Message);
+            throw;
+        }
     }
 }

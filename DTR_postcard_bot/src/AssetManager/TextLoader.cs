@@ -1,7 +1,6 @@
 using System.Text.Json;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
-using DTR_postcard_bot.DataLayer.Repository;
 
 namespace DTR_postcard_bot.AssetManager;
 

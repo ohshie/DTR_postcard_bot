@@ -10,7 +10,6 @@ public class AssetChoiceKeyboard(ButtonCreator buttonCreator)
     public async Task<InlineKeyboardMarkup> CreateKeyboard(AssetType assetType, bool firstStep = false)
     {
         InlineKeyboardMarkup keyboard;
-        InlineKeyboardButton[][] bigKeyboardLayout;
         
         var choiceButtons = await buttonCreator.AssembleChoiceButtons(assetType.Type);
 

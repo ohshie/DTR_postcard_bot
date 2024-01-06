@@ -31,7 +31,9 @@ class Program
             await dbContext.Database.EnsureCreatedAsync();
             
             var loader = services.GetRequiredService<Loader>();
-            await loader.Execute();
+            var initializationSuccess = await loader.Execute();
+
+            if (!initializationSuccess) return;
             
             var botClient = services.GetRequiredService<BotClient>();
             await botClient.BotOperations();
