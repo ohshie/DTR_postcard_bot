@@ -29,7 +29,7 @@ public abstract class CardCreatorBase
 
         if (card is null)
         {
-            card = await _startCardCreation.Handle(query, card);
+            card = await _startCardCreation.Handle(query);
         }
 
         await Handle(card, query);
@@ -40,5 +40,5 @@ public abstract class CardCreatorBase
         }
     }
     
-    protected abstract Task Handle(Card card, CallbackQuery? query);
+    protected abstract Task Handle(Card card, CallbackQuery query);
 }

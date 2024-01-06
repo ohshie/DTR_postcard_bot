@@ -23,8 +23,9 @@ public class AddElementToCard : CardCreatorBase
     {
         if (query is null) return;
 
-        var mediaTypeAndIdEnumerable = query.Data.Split(" ").Reverse().Take(2);
-        var mediaTypeAndId = $"{mediaTypeAndIdEnumerable.Last()} {mediaTypeAndIdEnumerable.First()}";
+        var mediaTypeAndIdArray = query.Data!.Split(" ").Reverse().Take(2).ToArray();
+        
+        var mediaTypeAndId = $"{mediaTypeAndIdArray.Last()} {mediaTypeAndIdArray.First()}";
         
         card.CreationSteps.Add(mediaTypeAndId);
 

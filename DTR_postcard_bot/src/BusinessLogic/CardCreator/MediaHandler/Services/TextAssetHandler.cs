@@ -1,6 +1,6 @@
+using System.Text;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
-using DTR_postcard_bot.DataLayer.Repository;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
 
@@ -15,13 +15,16 @@ public class TextAssetHandler(AssetOperator assetOperator, TextContent textConte
 
     private async Task<string> BuildMessageText(IEnumerable<Asset> assets)
     {
-        var messageText = await textContent.GetRequiredText("requestSomething", assets.FirstOrDefault().Type.Text);
+        var sb = new StringBuilder();
+        var assetsMap = new HashSet<Asset>(assets);
+        
+        var messageText = await textContent.GetRequiredText("requestSomething", assetsMap.FirstOrDefault()!.Type.Text);
         var counter = 0;
         
-        foreach (var asset in assets)
+        foreach (var asset in assetsMap)
         {
             counter++;
-            messageText += $"\n{counter}. {asset.Text}";
+            sb.Append($"\n{counter}. {asset.Text}");
         }
 
         return messageText;

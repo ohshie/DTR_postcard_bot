@@ -18,12 +18,10 @@ public class RequestMedia : CardCreatorBase
     private readonly AssetOperator _assetOperator;
     private readonly AssetTypeOperator _assetTypeOperator;
 
-    string _newMessageText = string.Empty;
-    InlineKeyboardMarkup _keyboardMarkup;
-    IEnumerable<InputMediaPhoto> _mediaContent;
-    private AssetType _requestedAssetType;
+    private string _newMessageText = string.Empty;
+    private InlineKeyboardMarkup _keyboardMarkup = null!;
 
-    public RequestMedia(ILogger<CardCreatorBase> logger, 
+    public RequestMedia(ILogger<RequestMedia> logger, 
         CardOperator cardOperator, 
         BotMessenger botMessenger,
         TextContent textContent, 
@@ -44,56 +42,60 @@ public class RequestMedia : CardCreatorBase
         _assetTypeOperator = assetTypeOperator;
     }
 
-    protected override async Task Handle(Card card, CallbackQuery? query)
+    protected override async Task Handle(Card card, CallbackQuery query)
     {
         card.Step++;
             
-        await ProcessRequest(card, query.Message.MessageId);
+        var requestedAssetType = await ProcessRequest(card, query.Message!.MessageId);
 
         if (card.Step == 1)
         {
-            _keyboardMarkup = await _assetChoiceKeyboard.CreateKeyboard(_requestedAssetType, firstStep: true);
+            _keyboardMarkup = await _assetChoiceKeyboard.CreateKeyboard(requestedAssetType, firstStep: true);
         }
         else
         {
-            _keyboardMarkup = await _assetChoiceKeyboard.CreateKeyboard(_requestedAssetType);
+            _keyboardMarkup = await _assetChoiceKeyboard.CreateKeyboard(requestedAssetType);
         }
         
-        await PrepareMessages(card, query.From.Id);
+        await PrepareMessages(card, query.From.Id, requestedAssetType);
 
         await _cardOperator.UpdateCard(card);
     }
 
-    private async Task ProcessRequest(Card card, int messageId)
+    private async Task<AssetType> ProcessRequest(Card card, int messageId)
     {
+        AssetType requestedAssetType;
+        
         if (card.Step == 1)
         {
-            _requestedAssetType = await _assetTypeOperator.GetById(card.AssetTypeIds.First());
+            requestedAssetType = await _assetTypeOperator.GetById(card.AssetTypeIds.First());
             
             await _botMessenger.DeleteMessageAsync(card.UserId, messageId);
             
-            _newMessageText = await _textContent.GetRequiredText("firstSelectMessage", _requestedAssetType.Text);
+            _newMessageText = await _textContent.GetRequiredText("firstSelectMessage", requestedAssetType.Text);
         }
         else
         {
-            _requestedAssetType = await _assetTypeOperator.GetById(card.AssetTypeIds[card.Step-1]);
+            requestedAssetType = await _assetTypeOperator.GetById(card.AssetTypeIds[card.Step-1]);
             
-            _newMessageText = await _textContent.GetRequiredText("requestSomething", _requestedAssetType.Text);
+            _newMessageText = await _textContent.GetRequiredText("requestSomething", requestedAssetType.Text);
 
             await _botMessenger.DeleteMessageRangeAsync(card.UserId, card.BotMessagesList);
         }
+
+        return requestedAssetType;
     }
 
-    private async Task PrepareMessages(Card card, long chatId)
+    private async Task PrepareMessages(Card card, long chatId, AssetType assetType)
     {
-        if (_requestedAssetType.Type != "text")
+        if (assetType.Type != "text")
         {
-            var (tgFileIdExist, _mediaContent) = await _mediaBatchHandler.PrepareBatch(_requestedAssetType);
+            var (tgFileIdExist, mediaContent) = await _mediaBatchHandler.PrepareBatch(assetType);
             
             var sentMessagesList = await _botMessenger.SendNewMediaGroupMessage(chatId: chatId,
                 text: _newMessageText,
                 keyboardMarkup: _keyboardMarkup,
-                media: _mediaContent);
+                media: mediaContent);
         
             card.BotMessagesList = sentMessagesList.Select(m => m.MessageId).ToList();
 
@@ -101,15 +103,15 @@ public class RequestMedia : CardCreatorBase
             {
                 var fileIds = sentMessagesList
                     .Where(messages => messages.Photo is not null)
-                    .Select(m => m.Photo.Last())
+                    .Select(m => m.Photo!.Last())
                     .Select(ps => ps.FileId).ToArray();
 
-                await _assetOperator.WriteTelegramFileIds(fileIds, _requestedAssetType.Type);
+                await _assetOperator.WriteTelegramFileIds(fileIds, assetType.Type);
             }
         }
         else
         {
-            var assetsText = await _textAssetHandler.PrepareBatch(_requestedAssetType);
+            var assetsText = await _textAssetHandler.PrepareBatch(assetType);
 
             var message = await _botMessenger.SendTextMessage(chatId: chatId,
                 text: assetsText,

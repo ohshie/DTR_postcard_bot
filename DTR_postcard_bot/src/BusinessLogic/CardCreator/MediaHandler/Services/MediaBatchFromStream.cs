@@ -1,6 +1,5 @@
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
-using DTR_postcard_bot.DataLayer.Repository;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
 
@@ -8,11 +7,11 @@ public class MediaBatchFromStream(AssetOperator assetOperator) : IMediaBatchHand
 {
     public async Task<(bool, IEnumerable<InputMediaPhoto>)> PrepareBatch(AssetType assetType)
     {
-        var allRequiredAssets = await assetOperator.GetAssetsByType(assetType.Type);
+        var allRequiredAssets = await assetOperator.GetAssetsByType(assetType.Type) as HashSet<Asset>;
         
-        var inputMediaPhotos = AssembleBatch(allRequiredAssets.Where(a => a.DisplayAsset));
+        var inputMediaPhotos = AssembleBatch(allRequiredAssets!.Where(a => a.DisplayAsset));
 
-        var tgFileIdExist = !string.IsNullOrEmpty(allRequiredAssets
+        var tgFileIdExist = !string.IsNullOrEmpty(allRequiredAssets!
             .Select(a => a.TelegramFileId)
             .FirstOrDefault());
         

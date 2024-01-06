@@ -1,6 +1,5 @@
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
-using DTR_postcard_bot.DataLayer.Repository;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -42,7 +41,7 @@ public class AssembleMediaIntoCard(AssetOperator assetOperator)
         
         var pathToAsset = Helpers.PathBuilder(folderType: _assetsFolderName,
             subfolder: type, 
-            fileName: asset.FileName);
+            fileName: asset!.FileName);
 
         return await Image.LoadAsync(pathToAsset);
     }

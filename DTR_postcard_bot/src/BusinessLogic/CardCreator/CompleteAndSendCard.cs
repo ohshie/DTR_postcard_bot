@@ -3,7 +3,6 @@ using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
-using DTR_postcard_bot.DataLayer.Repository;
 using File = System.IO.File;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator;
