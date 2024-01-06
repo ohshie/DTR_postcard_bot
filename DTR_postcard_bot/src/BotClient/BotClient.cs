@@ -31,9 +31,10 @@ public class BotClient(ITelegramBotClient botClient,
         logger.LogWarning("bot started @{Me}", me);
         
         ShutdownEvent.WaitOne();
+        
         logger.LogCritical("bot stopped");
         
-        cts.Cancel();
+        await cts.CancelAsync();
     }
     
     async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -47,7 +48,7 @@ public class BotClient(ITelegramBotClient botClient,
 
         if (update.Message is { } message)
         {
-            logger.LogWarning("Handling update {Update} type {Type} from {UserId}", message.MessageId, update.Type, message.From.Id);
+            logger.LogWarning("Handling update {Update} type {Type} from {UserId}", message.MessageId, update.Type, message.From!.Id);
             await botGreetMessage.Send(message);
         }
     }

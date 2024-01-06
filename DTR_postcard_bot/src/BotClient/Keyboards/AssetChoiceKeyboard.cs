@@ -1,6 +1,5 @@
 using DTR_postcard_bot.BotClient.Keyboards.Buttons;
 using DTR_postcard_bot.DataLayer.Models;
-using DTR_postcard_bot.DataLayer.Repository;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace DTR_postcard_bot.BotClient.Keyboards;

@@ -15,7 +15,7 @@ public class CallbackFactory(RequestMedia requestMedia,
     
     public async Task CallBackDataManager(CallbackQuery query)
     {
-        string key = query.Data.Split(" ")[0];
+        var key = query.Data!.Split(" ")[0];
         
         if (query.Data != null && _botTaskFactory.TryGetValue(key, out var value))
         {

@@ -5,7 +5,7 @@ namespace DTR_postcard_bot.DataLayer;
 
 public class StatOperator(IRepository<Stat> repository, ILogger<StatOperator> logger)
 {
-    public async Task RegisterUser(long id, string name)
+    public async Task RegisterUser(long id, string? name)
     {
         var registeredUser = await repository.Get(id);
         if (registeredUser is null)

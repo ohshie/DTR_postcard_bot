@@ -1,6 +1,5 @@
 using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Repository;
 
 namespace DTR_postcard_bot.BotClient;
 
@@ -16,7 +15,7 @@ public class BotGreetMessage(ITelegramBotClient botClient,
                 text: await textContent.GetRequiredText("greetingsMessage"), 
                 replyMarkup: cardCreationKeyboard.CreateKeyboard());
 
-            await statOperator.RegisterUser(message.From.Id, message.From.Username);
+            await statOperator.RegisterUser(message.From!.Id, message.From.Username);
         }
     }
 
