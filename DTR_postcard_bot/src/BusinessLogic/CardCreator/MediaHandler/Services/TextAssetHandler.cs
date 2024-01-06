@@ -20,6 +20,8 @@ public class TextAssetHandler(AssetOperator assetOperator, TextContent textConte
         
         var messageText = await textContent.GetRequiredText("requestSomething", assetsMap.FirstOrDefault()!.Type.Text);
         var counter = 0;
+
+        sb.Append(messageText);
         
         foreach (var asset in assetsMap)
         {
@@ -27,6 +29,6 @@ public class TextAssetHandler(AssetOperator assetOperator, TextContent textConte
             sb.Append($"\n{counter}. {asset.Text}");
         }
 
-        return messageText;
+        return sb.ToString();
     }
 }

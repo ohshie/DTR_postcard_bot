@@ -1,3 +1,4 @@
+using DTR_postcard_bot.BotClient;
 using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.Models;
 
@@ -27,7 +28,7 @@ public abstract class CardCreatorBase
         
         var card = await _cardOperator.GetCard(query.From.Id);
 
-        if (card is null)
+        if (card is null || query.Data == CallbackList.CreateNew)
         {
             card = await _startCardCreation.Handle(query);
         }

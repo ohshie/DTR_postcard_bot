@@ -7,11 +7,13 @@ public class MediaBatchFromStream(AssetOperator assetOperator) : IMediaBatchHand
 {
     public async Task<(bool, IEnumerable<InputMediaPhoto>)> PrepareBatch(AssetType assetType)
     {
-        var allRequiredAssets = await assetOperator.GetAssetsByType(assetType.Type) as HashSet<Asset>;
+        var allRequiredAssets = await assetOperator.GetAssetsByType(assetType.Type);
         
-        var inputMediaPhotos = AssembleBatch(allRequiredAssets!.Where(a => a.DisplayAsset));
+        var requiredAssets = allRequiredAssets as Asset[] ?? allRequiredAssets.ToArray();
+        
+        var inputMediaPhotos = AssembleBatch(requiredAssets!.Where(a => a.DisplayAsset));
 
-        var tgFileIdExist = !string.IsNullOrEmpty(allRequiredAssets!
+        var tgFileIdExist = !string.IsNullOrEmpty(requiredAssets!
             .Select(a => a.TelegramFileId)
             .FirstOrDefault());
         
