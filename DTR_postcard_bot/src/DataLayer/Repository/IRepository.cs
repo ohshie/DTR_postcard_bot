@@ -1,5 +1,3 @@
-using DTR_postcard_bot.DataLayer.Models;
-
 namespace DTR_postcard_bot.DataLayer.Repository;
 
 public interface IRepository<TEntity> where TEntity : class

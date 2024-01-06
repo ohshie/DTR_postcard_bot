@@ -20,7 +20,7 @@ public class CardRepository(PostcardDbContext dbContext) : IRepository<Card>
 
     public async Task<IEnumerable<Card>> GetAll(int id)
     {
-        return dbContext.Cards.Where(c => c.UserId == id).ToList();
+        return await dbContext.Cards.Where(c => c.UserId == id).ToListAsync();
     }
 
     public async Task Add(Card id)

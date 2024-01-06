@@ -20,7 +20,7 @@ public class AssetOperator(IRepository<Asset> repository,
 
         if (!assets.Any()) return new List<Asset>();
         
-        return assets.Where(a => a.Type!.Type == type);
+        return assets.Where(a => a.Type.Type == type);
     }
 
     public async Task AddBatchAssets(List<Asset> assets)
@@ -40,7 +40,7 @@ public class AssetOperator(IRepository<Asset> repository,
         logger.LogInformation("Adding telegram Id's to assets of type: {AssetType}",assetType);
         
         var assetsSortedByTypes = (await repository.GetAll())
-            .Where(a => a.Type!.Type == assetType && a.DisplayAsset)
+            .Where(a => a.Type.Type == assetType && a.DisplayAsset)
             .ToArray();
 
         if (!string.IsNullOrEmpty(assetsSortedByTypes

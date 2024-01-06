@@ -1,5 +1,4 @@
-﻿using DTR_postcard_bot;
-using DTR_postcard_bot.AssetManager;
+﻿using DTR_postcard_bot.AssetManager;
 using DTR_postcard_bot.BotClient;
 using DTR_postcard_bot.BotClient.Keyboards;
 using DTR_postcard_bot.BotClient.Keyboards.Buttons;
@@ -16,7 +15,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
-class Program
+namespace DTR_postcard_bot;
+
+static class Program
 {
     public static async Task Main(string[] args)
     {
@@ -35,7 +36,7 @@ class Program
 
             if (!initializationSuccess) return;
             
-            var botClient = services.GetRequiredService<BotClient>();
+            var botClient = services.GetRequiredService<BotClient.BotClient>();
             await botClient.BotOperations();
 
             await host.WaitForShutdownAsync();
@@ -92,7 +93,7 @@ class Program
         collection.AddTransient<IRepository<Stat>, StatRepository>();
         
         // Bot client
-        collection.AddTransient<BotClient>();
+        collection.AddTransient<BotClient.BotClient>();
         collection.AddTransient<BotMessenger>();
 
         collection.AddTransient<ButtonCreator>();
@@ -119,4 +120,3 @@ class Program
         collection.AddTransient<TextContent>();
     }
 }
-

@@ -8,6 +8,7 @@ public class StatOperator(IRepository<Stat> repository, ILogger<StatOperator> lo
     public async Task RegisterUser(long id, string? name)
     {
         var registeredUser = await repository.Get(id);
+        
         if (registeredUser is null)
         {
             logger.LogInformation("Registering user {UserId}", id);

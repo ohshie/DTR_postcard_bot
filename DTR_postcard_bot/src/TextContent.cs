@@ -1,5 +1,4 @@
 using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Repository;
 
 namespace DTR_postcard_bot;
 
@@ -9,7 +8,7 @@ public class TextContent(TextOperator textOperator)
     {
         var textBase = await textOperator.GetRequiredText(trigger);
 
-        if (textBase.Content.Contains("{assetType}"))
+        if (textBase!.Content.Contains("{assetType}"))
         {
             return textBase.Content.Replace("{assetType}", trigger);
         }
@@ -21,7 +20,7 @@ public class TextContent(TextOperator textOperator)
     {
         var textBase = await textOperator.GetRequiredText(trigger);
 
-        if (textBase.Content.Contains("{assetType}"))
+        if (textBase!.Content.Contains("{assetType}"))
         {
             return textBase.Content.Replace("{assetType}", assetType);
         }
