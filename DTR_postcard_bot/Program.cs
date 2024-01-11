@@ -9,6 +9,7 @@ using DTR_postcard_bot.DataLayer;
 using DTR_postcard_bot.DataLayer.DbContext;
 using DTR_postcard_bot.DataLayer.Models;
 using DTR_postcard_bot.DataLayer.Repository;
+using DTR_postcard_bot.DataLayer.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,10 +87,10 @@ static class Program
         collection.AddTransient<TextOperator>();
         collection.AddTransient<StatOperator>();
         
-        collection.AddTransient<IRepository<Card>, CardRepository>();
-        collection.AddTransient<IRepository<Asset>, AssetRepository>();
-        collection.AddTransient<IRepository<AssetType>, AssetTypeRepository>();
-        collection.AddTransient<IRepository<Text>, TextRepository>();
+        collection.AddTransient<ICardRepository, CardRepository>();
+        collection.AddTransient<IAssetRepository, AssetRepository>();
+        collection.AddTransient<IAssetTypeRepository, AssetTypeRepository>();
+        collection.AddTransient<ITextRepository, TextRepository>();
         collection.AddTransient<IRepository<Stat>, StatRepository>();
         
         // Bot client

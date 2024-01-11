@@ -1,9 +1,10 @@
 using DTR_postcard_bot.DataLayer.Models;
 using DTR_postcard_bot.DataLayer.Repository;
+using DTR_postcard_bot.DataLayer.Repository.Interfaces;
 
 namespace DTR_postcard_bot.DataLayer;
 
-public class AssetTypeOperator(IRepository<AssetType> repository)
+public class AssetTypeOperator(IAssetTypeRepository repository)
 {
     public async Task<AssetType> GetById(int id)
     {

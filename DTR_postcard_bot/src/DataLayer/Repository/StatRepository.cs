@@ -22,12 +22,6 @@ public class StatRepository(PostcardDbContext dbContext) : IRepository<Stat>
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task BatchAdd(IEnumerable<Stat> entities)
-    {
-        await dbContext.Stats.AddRangeAsync(entities);
-        await dbContext.SaveChangesAsync();
-    }
-
     public async Task Update(Stat entity)
     {
         dbContext.Stats.Update(entity);

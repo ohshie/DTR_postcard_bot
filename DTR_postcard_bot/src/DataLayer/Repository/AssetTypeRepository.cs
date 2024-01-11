@@ -1,10 +1,11 @@
 using DTR_postcard_bot.DataLayer.DbContext;
 using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DataLayer.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DTR_postcard_bot.DataLayer.Repository;
 
-public class AssetTypeRepository(PostcardDbContext dbContext) : IRepository<AssetType>
+public class AssetTypeRepository(PostcardDbContext dbContext) : IAssetTypeRepository
 {
     public async Task<AssetType> Get(long id)
     {

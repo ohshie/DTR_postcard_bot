@@ -1,9 +1,10 @@
 using DTR_postcard_bot.DataLayer.Models;
 using DTR_postcard_bot.DataLayer.Repository;
+using DTR_postcard_bot.DataLayer.Repository.Interfaces;
 
 namespace DTR_postcard_bot.DataLayer;
 
-public class AssetOperator(IRepository<Asset> repository, 
+public class AssetOperator(IAssetRepository repository, 
     ILogger<AssetOperator> logger)
 {
     public async Task<Asset> Get(long id)
@@ -51,14 +52,11 @@ public class AssetOperator(IRepository<Asset> repository,
         
         if (assetsSortedByTypes.Length != fileIdArray.Length) return;
 
-        var indexer = 0;
-        
-        foreach (var fileId in fileIdArray)
+        for (var i = 0; i < fileIdArray.Length; i++)
         {
-            assetsSortedByTypes[indexer].TelegramFileId = fileId;
-            indexer++;
+            assetsSortedByTypes[i].TelegramFileId = fileIdArray[i];
         }
-
+        
         await repository.BatchUpdate(assetsSortedByTypes);
     }
 }

@@ -1,9 +1,10 @@
 using DTR_postcard_bot.DataLayer.Models;
 using DTR_postcard_bot.DataLayer.Repository;
+using DTR_postcard_bot.DataLayer.Repository.Interfaces;
 
 namespace DTR_postcard_bot.DataLayer;
 
-public class CardOperator(IRepository<Card> repository, ILogger<CardOperator> logger)
+public class CardOperator(ICardRepository repository, ILogger<CardOperator> logger)
 {
     public async Task<Card?> GetCard(long userId)
     {
