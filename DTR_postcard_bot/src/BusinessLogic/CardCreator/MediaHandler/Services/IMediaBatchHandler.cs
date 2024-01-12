@@ -1,4 +1,4 @@
-using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DAL.Models;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
 

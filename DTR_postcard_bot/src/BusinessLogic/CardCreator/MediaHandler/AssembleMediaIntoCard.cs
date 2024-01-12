@@ -1,5 +1,5 @@
-using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DAL.Models;
+using DTR_postcard_bot.DAL.UoW.IUoW;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -7,7 +7,7 @@ using Point = SixLabors.ImageSharp.Point;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
 
-public class AssembleMediaIntoCard(AssetOperator assetOperator)
+public class AssembleMediaIntoCard(IUnitOfWork unitOfWork)
 {
     private readonly string _assetsFolderName = "assets";
     private readonly Random _random = new();
@@ -31,11 +31,11 @@ public class AssembleMediaIntoCard(AssetOperator assetOperator)
 
     private async Task<Image> LoadImages(string type, long id)
     {
-        var asset = await assetOperator.Get(id);
+        var asset = await unitOfWork.Assets.Get(id);
         
         if (asset is null)
         {
-            var assetsByType = await assetOperator.GetAssetsByType(type);
+            var assetsByType = await unitOfWork.Assets.GetByType(type);
             asset = assetsByType.FirstOrDefault();
         }
         

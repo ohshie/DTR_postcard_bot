@@ -1,19 +1,16 @@
 using System.Text.Json;
-using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DAL.Models;
+using DTR_postcard_bot.DAL.UoW.IUoW;
 
 namespace DTR_postcard_bot.AssetManager;
 
-public class AssetLoader(AssetOperator assetOperator, 
-    AssetTypeOperator assetTypeOperator)
+public class AssetLoader(IUnitOfWork unitOfWork)
 {
-    public async Task Load(JsonDocument jDoc)
+    public async Task Load(JsonDocument jDoc, IEnumerable<AssetType> assetTypes)
     {
-        var assetTypes = await assetTypeOperator.GetAllAssetTypes();
-        
         var assets = AssembleIntoBatch(jDoc, assetTypes.ToArray());
 
-        await assetOperator.AddBatchAssets(assets);
+        await unitOfWork.Assets.BatchAdd(assets);
     }
 
     private List<Asset> AssembleIntoBatch(JsonDocument jDoc, 

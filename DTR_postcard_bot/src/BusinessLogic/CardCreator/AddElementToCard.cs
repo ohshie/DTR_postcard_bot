@@ -1,24 +1,14 @@
-using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DAL.Models;
+using DTR_postcard_bot.DAL.UoW.IUoW;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator;
 
-public class AddElementToCard : CardCreatorBase
+public class AddElementToCard(ILogger<AddElementToCard> logger, 
+    IUnitOfWork unitOfWork, 
+    StartCardCreation startCardCreation, 
+    CompleteAndSendCard completeAndSendCard,
+    RequestMedia requestMedia) : CardCreatorBase(logger, startCardCreation, unitOfWork)
 {
-    private readonly CardOperator _cardOperator;
-    private readonly RequestMedia _requestMedia;
-    private readonly CompleteAndSendCard _completeAndSendCard;
-
-    public AddElementToCard(ILogger<AddElementToCard> logger, 
-        CardOperator cardOperator , RequestMedia requestMedia, CompleteAndSendCard completeAndSendCard,
-        StartCardCreation startCardCreation) : 
-        base(logger, cardOperator, startCardCreation)
-    {
-        _cardOperator = cardOperator;
-        _requestMedia = requestMedia;
-        _completeAndSendCard = completeAndSendCard;
-    }
-
     protected override async Task Handle(Card card, CallbackQuery? query)
     {
         if (query is null) return;
@@ -29,15 +19,21 @@ public class AddElementToCard : CardCreatorBase
         
         card.CreationSteps.Add(mediaTypeAndId);
 
-        await _cardOperator.UpdateCard(card);
+        await UpdateCard(card);
         
         if (card.Step < card.AssetTypeIds.Count)
         {
-            NextTask = _requestMedia;
+            NextTask = requestMedia;
         }
         else
         {
-            NextTask = _completeAndSendCard;
+            NextTask = completeAndSendCard;
         }
+    }
+
+    private async Task UpdateCard(Card card)
+    {
+        await unitOfWork.Cards.Update(card);
+        await unitOfWork.CompleteAsync();
     }
 }

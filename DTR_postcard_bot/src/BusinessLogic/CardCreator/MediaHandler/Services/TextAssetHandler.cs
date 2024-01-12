@@ -1,14 +1,14 @@
 using System.Text;
-using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DAL.Models;
+using DTR_postcard_bot.DAL.UoW.IUoW;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
 
-public class TextAssetHandler(AssetOperator assetOperator, TextContent textContent)
+public class TextAssetHandler(IUnitOfWork unitOfWork, TextContent textContent)
 {
     public async Task<string> PrepareBatch(AssetType assetType)
     {
-        var allRequiredAssets = await assetOperator.GetAssetsByType(assetType.Type);
+        var allRequiredAssets = await unitOfWork.Assets.GetByType(assetType.Type);
 
         return await BuildMessageText(allRequiredAssets);
     }

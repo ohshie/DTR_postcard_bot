@@ -1,32 +1,32 @@
 using DTR_postcard_bot.BotClient;
-using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DAL.Models;
+using DTR_postcard_bot.DAL.UoW.IUoW;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator;
 
 public abstract class CardCreatorBase
 {
     private readonly ILogger<CardCreatorBase> _logger;
-    private readonly CardOperator _cardOperator;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly StartCardCreation _startCardCreation;
 
     protected CardCreatorBase? NextTask;
 
     protected CardCreatorBase( 
-        ILogger<CardCreatorBase> logger, 
-        CardOperator cardOperator,
-        StartCardCreation startCardCreation)
+        ILogger<CardCreatorBase> logger,
+        StartCardCreation startCardCreation, 
+        IUnitOfWork unitOfWork)
     {
         _logger = logger;
-        _cardOperator = cardOperator;
         _startCardCreation = startCardCreation;
+        _unitOfWork = unitOfWork;
     }
     
     public async Task Execute(CallbackQuery query)
     { 
         _logger.LogInformation("Processing {UserId} query {QueryType}", query.From.Id, query.Data);
         
-        var card = await _cardOperator.GetCard(query.From.Id);
+        var card = await _unitOfWork.Cards.Get(query.From.Id);
 
         if (card is null || query.Data == CallbackList.CreateNew)
         {

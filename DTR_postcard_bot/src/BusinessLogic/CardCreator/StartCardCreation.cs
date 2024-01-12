@@ -1,13 +1,12 @@
 using DTR_postcard_bot.BotClient;
-using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DAL.Models;
+using DTR_postcard_bot.DAL.UoW.IUoW;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator;
 
-public class StartCardCreation(ILogger<StartCardCreation> logger,
-    CardOperator cardOperator,
-    AssetTypeOperator assetTypeOperator,
-    StatOperator statOperator, BotMessenger botMessenger)
+public class StartCardCreation(ILogger<StartCardCreation> logger, 
+    BotMessenger botMessenger,
+    IUnitOfWork unitOfWork)
 {
     public async Task<Card> Handle(CallbackQuery query)
     {
@@ -19,23 +18,45 @@ public class StartCardCreation(ILogger<StartCardCreation> logger,
         
         logger.LogInformation("Registering new Card creation for UserId {UserId}", query.From.Id);
         
-        var assetTypes = await assetTypeOperator.GetAllAssetTypes();
+        var assetTypes = await unitOfWork.AssetTypes.GetAll();
         
-        var card = await cardOperator.RegisterNewCard(query.From.Id, query.Message!.MessageId, assetTypes);
+        var card = await RegisterNewCard(query, assetTypes);
+        
+        return card;
+    }
 
-        await statOperator.RegisterUser(card.UserId, query.From.Username);
-        await statOperator.IncrementStartedCard(card.UserId);
+    private async Task<Card> RegisterNewCard(CallbackQuery query, IEnumerable<AssetType> assetTypes)
+    {
+        var userId = query.From.Id;
+        var userName = query.From.Username;
+        var messageId = query.Message!.MessageId;
+        
+        Card card = new()
+        {
+            UserId = userId,
+            BotMessagesList = new List<int>(messageId),
+            CreationSteps = new List<string>(),
+            CardCreationInProcess = true,
+            Step = 0,
+            AssetTypeIds = assetTypes.Select(at => at.Id).ToList()
+        };
+        
+        var success = await unitOfWork.Cards.Add(card);
+        success = await unitOfWork.Stats.UpdateOrAdd(userId, userName);
+        
+        await unitOfWork.CompleteAsync();
 
         return card;
     }
 
     private async Task OldCardCleanUp(CallbackQuery query)
     {
-        var card = await cardOperator.GetCard(query.From.Id);
+        var card = await unitOfWork.Cards.Get(query.From.Id);
 
         if (card is not null)
         {
-            await cardOperator.RemoveCard(card);
+            await unitOfWork.Cards.Remove(card);
+            await unitOfWork.CompleteAsync();
             await botMessenger.DeleteMessageAsync(query.From.Id, query.Message!.MessageId);
         }
     }

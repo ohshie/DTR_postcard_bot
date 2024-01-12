@@ -1,11 +1,14 @@
 using DTR_postcard_bot.BotClient.Keyboards;
-using DTR_postcard_bot.DataLayer;
+using DTR_postcard_bot.DAL;
+using DTR_postcard_bot.DAL.Models;
+using DTR_postcard_bot.DAL.UoW;
+using DTR_postcard_bot.DAL.UoW.IUoW;
 
 namespace DTR_postcard_bot.BotClient;
 
 public class BotGreetMessage(ITelegramBotClient botClient, 
     TextContent textContent, 
-    CardCreationKeyboard cardCreationKeyboard, StatOperator statOperator)
+    CardCreationKeyboard cardCreationKeyboard, IUnitOfWork unitOfWork)
 {
     public async Task Send(Message message)
     {
@@ -15,7 +18,7 @@ public class BotGreetMessage(ITelegramBotClient botClient,
                 text: await textContent.GetRequiredText("greetingsMessage"), 
                 replyMarkup: cardCreationKeyboard.CreateKeyboard());
 
-            await statOperator.RegisterUser(message.From!.Id, message.From.Username);
+            await CreateStatRecord(message.From!.Id, message.From.Username);
         }
     }
 
@@ -24,7 +27,20 @@ public class BotGreetMessage(ITelegramBotClient botClient,
         await botClient.SendTextMessageAsync(chatId: chatId,
             text: await textContent.GetRequiredText("greetingsMessage"),
             replyMarkup: cardCreationKeyboard.CreateKeyboard());
-        
-        await statOperator.RegisterUser(chatId, string.Empty);
+
+        await CreateStatRecord(chatId, string.Empty);
+    }
+    
+    private async Task CreateStatRecord(long userId, string? name = null)
+    {
+        var stat = new Stat()
+        {
+            UserId = userId,
+            UserName = string.IsNullOrEmpty(name) ? "Anonymous" : name,
+            CreatedCards = 0,
+            DroppedCards = 0
+        };
+            
+        await unitOfWork.Stats.Add(stat);
     }
 }

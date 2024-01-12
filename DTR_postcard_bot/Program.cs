@@ -5,11 +5,11 @@ using DTR_postcard_bot.BotClient.Keyboards.Buttons;
 using DTR_postcard_bot.BusinessLogic.CardCreator;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler;
 using DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
-using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.DbContext;
-using DTR_postcard_bot.DataLayer.Models;
-using DTR_postcard_bot.DataLayer.Repository;
-using DTR_postcard_bot.DataLayer.Repository.Interfaces;
+using DTR_postcard_bot.DAL;
+using DTR_postcard_bot.DAL.DbContext;
+using DTR_postcard_bot.DAL.Repository.IRepositories;
+using DTR_postcard_bot.DAL.UoW;
+using DTR_postcard_bot.DAL.UoW.IUoW;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -68,30 +68,26 @@ static class Program
             return new TelegramBotClient(token!);
         });
         
-        // Asset Manager
-        collection.AddTransient<Loader>();
-        collection.AddTransient<AssetCleaner>();
-        collection.AddTransient<AssetTypeLoader>();
-        collection.AddTransient<AssetLoader>();
-        collection.AddTransient<TextLoader>();
-
         // Data Layer
         collection.AddDbContext<PostcardDbContext>(s =>
         {
             s.UseSqlite(context.Configuration.GetConnectionString("DefaultConnection"));
         });
         
-        collection.AddTransient<CardOperator>();
-        collection.AddTransient<AssetOperator>();
-        collection.AddTransient<AssetTypeOperator>();
-        collection.AddTransient<TextOperator>();
-        collection.AddTransient<StatOperator>();
+        collection.AddScoped<IUnitOfWork, UnitOfWork>();
         
-        collection.AddTransient<ICardRepository, CardRepository>();
-        collection.AddTransient<IAssetRepository, AssetRepository>();
-        collection.AddTransient<IAssetTypeRepository, AssetTypeRepository>();
-        collection.AddTransient<ITextRepository, TextRepository>();
-        collection.AddTransient<IRepository<Stat>, StatRepository>();
+        collection.AddScoped<ICardRepository, CardRepository>();
+        collection.AddScoped<IAssetRepository, AssetRepository>();
+        collection.AddScoped<IAssetTypeRepository, AssetTypeRepository>();
+        collection.AddScoped<ITextRepository, TextRepository>();
+        collection.AddScoped<IStatRepository, StatRepository>();
+        
+        // Asset Manager
+        collection.AddTransient<Loader>();
+        collection.AddTransient<AssetCleaner>();
+        collection.AddTransient<AssetTypeLoader>();
+        collection.AddTransient<AssetLoader>();
+        collection.AddTransient<TextLoader>();
         
         // Bot client
         collection.AddTransient<BotClient.BotClient>();

@@ -1,11 +1,13 @@
 using System.Text.Json;
+using DTR_postcard_bot.DAL.UoW.IUoW;
 using Microsoft.Extensions.Configuration;
 using File = System.IO.File;
 
 namespace DTR_postcard_bot.AssetManager;
 
-public class Loader(AssetCleaner cleaner, 
+public class Loader(AssetCleaner cleaner,
     IConfiguration configuration,
+    IUnitOfWork unitOfWork,
     AssetLoader assetLoader, 
     AssetTypeLoader assetTypeLoader,
     TextLoader textLoader,
@@ -20,7 +22,9 @@ public class Loader(AssetCleaner cleaner,
         
         var assetsSuccess = await LoadAssets(dataTypes);
         var textSuccess = await LoadTexts(dataTypes);
-
+        
+        await unitOfWork.CompleteAsync();
+        
         return assetsSuccess && textSuccess;
     }
 
@@ -40,9 +44,9 @@ public class Loader(AssetCleaner cleaner,
 
         if (assetsJDoc is null) return false;
     
-        await assetTypeLoader.Load(assetsJDoc);
-        await assetLoader.Load(assetsJDoc);
-
+        var assetTypes = await assetTypeLoader.Load(assetsJDoc);
+        await assetLoader.Load(assetsJDoc, assetTypes);
+        
         return true;
     }
     

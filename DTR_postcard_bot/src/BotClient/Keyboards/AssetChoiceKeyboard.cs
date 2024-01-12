@@ -1,14 +1,14 @@
 using DTR_postcard_bot.BotClient.Keyboards.Buttons;
-using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DAL.Models;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace DTR_postcard_bot.BotClient.Keyboards;
 
 public class AssetChoiceKeyboard(ButtonCreator buttonCreator)
 {
-    public async Task<InlineKeyboardMarkup> CreateKeyboard(AssetType assetType, bool firstStep = false)
+    public async Task<InlineKeyboardMarkup?> CreateKeyboard(AssetType assetType, bool firstStep = false)
     {
-        InlineKeyboardMarkup keyboard;
+        InlineKeyboardMarkup? keyboard;
         
         var choiceButtons = await buttonCreator.AssembleChoiceButtons(assetType.Type);
 
@@ -36,7 +36,7 @@ public class AssetChoiceKeyboard(ButtonCreator buttonCreator)
         return keyboard;
     }
 
-    private InlineKeyboardMarkup AssembleBigKeyboard(InlineKeyboardButton[] choiceButtons)
+    private InlineKeyboardMarkup? AssembleBigKeyboard(InlineKeyboardButton[] choiceButtons)
     {
         var splitter = choiceButtons.Length / 2;
         var firstRow = choiceButtons

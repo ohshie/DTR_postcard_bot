@@ -1,7 +1,7 @@
-using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DTR_postcard_bot.DataLayer.DbContext;
+namespace DTR_postcard_bot.DAL.DbContext;
 
 public class PostcardDbContext : Microsoft.EntityFrameworkCore.DbContext
 {

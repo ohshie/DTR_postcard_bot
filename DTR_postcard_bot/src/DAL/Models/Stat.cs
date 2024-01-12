@@ -1,4 +1,4 @@
-namespace DTR_postcard_bot.DataLayer.Models;
+namespace DTR_postcard_bot.DAL.Models;
 
 public class Stat
 {

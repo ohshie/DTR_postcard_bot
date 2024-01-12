@@ -1,13 +1,13 @@
-using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DAL.Models;
+using DTR_postcard_bot.DAL.UoW.IUoW;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator.MediaHandler.Services;
 
-public class MediaBatchFromStream(AssetOperator assetOperator) : IMediaBatchHandler
+public class MediaBatchFromStream(IUnitOfWork unitOfWork) : IMediaBatchHandler
 {
     public async Task<(bool, IEnumerable<InputMediaPhoto>)> PrepareBatch(AssetType assetType)
     {
-        var allRequiredAssets = await assetOperator.GetAssetsByType(assetType.Type);
+        var allRequiredAssets = await unitOfWork.Assets.GetByType(assetType.Type);
         
         var requiredAssets = allRequiredAssets as Asset[] ?? allRequiredAssets.ToArray();
         

@@ -1,15 +1,14 @@
 using DTR_postcard_bot.BotClient;
-using DTR_postcard_bot.DataLayer;
-using DTR_postcard_bot.DataLayer.Models;
+using DTR_postcard_bot.DAL.Models;
+using DTR_postcard_bot.DAL.UoW.IUoW;
 
 namespace DTR_postcard_bot.BusinessLogic.CardCreator;
 
 public class CancelCardCreation(ILogger<CancelCardCreation> logger, 
-        CardOperator cardOperator, 
         BotMessenger messenger, 
         BotGreetMessage botGreetMessage,
-        StartCardCreation startCardCreation)
-    : CardCreatorBase(logger, cardOperator, startCardCreation)
+        StartCardCreation startCardCreation, IUnitOfWork unitOfWork)
+    : CardCreatorBase(logger, startCardCreation, unitOfWork)
 {
     private readonly ILogger<CardCreatorBase> _logger = logger;
 
@@ -17,11 +16,17 @@ public class CancelCardCreation(ILogger<CancelCardCreation> logger,
     {
         _logger.LogInformation("Removing all card information from {UserId} and setting state to 0", card.UserId);
         
-        await cardOperator.RemoveCard(card);
+        await RemoveCard(card);
 
         await messenger.DeleteMessageRangeAsync(chatId: card.UserId,
             messagesId: card.BotMessagesList);
 
         await botGreetMessage.Send(card.UserId);
+    }
+
+    private async Task RemoveCard(Card card)
+    {
+        await unitOfWork.Cards.Remove(card);
+        await unitOfWork.CompleteAsync();
     }
 }
