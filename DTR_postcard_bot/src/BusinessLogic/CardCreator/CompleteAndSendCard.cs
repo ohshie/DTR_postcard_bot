@@ -31,9 +31,9 @@ public class CompleteAndSendCard(ILogger<CompleteAndSendCard> logger,
 
     private async Task CompleteCard(Card card)
     {
-        var success =await unitOfWork.Cards.Remove(card);
-        success = await unitOfWork.Stats.UpdateOnFinish(card.UserId);
-        
+        await unitOfWork.Cards.Remove(card);
+        await unitOfWork.Stats.UpdateOnFinish(card.UserId);
+
         await unitOfWork.CompleteAsync();
     }
 

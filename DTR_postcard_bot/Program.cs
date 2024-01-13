@@ -103,7 +103,15 @@ static class Program
         // adding stuff to card
         collection.AddTransient<AddElementToCard>();
 
-        collection.AddTransient<IMediaBatchHandler, MediaBatchFromStream>();
+        if (context.Configuration.GetValue<bool>("AssetsFromUrl"))
+        {
+            collection.AddTransient<IMediaBatchHandler, MediaBatchFromUri>();
+        }
+        else
+        {
+            collection.AddTransient<IMediaBatchHandler, MediaBatchFromStream>();
+        }
+        
         collection.AddTransient<TextAssetHandler>();
         collection.AddTransient<AssembleMediaIntoCard>();
 

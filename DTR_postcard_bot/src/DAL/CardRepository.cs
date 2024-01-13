@@ -9,7 +9,7 @@ namespace DTR_postcard_bot.DAL;
 public class CardRepository(PostcardDbContext dbContext, ILogger<CardRepository> logger) : 
     GenericRepository<Card>(dbContext, logger), ICardRepository
 {
-    public override async Task<IEnumerable<Card>> GetAll()
+    public override async Task<IEnumerable<Card>?> GetAll()
     {
         try
         {
@@ -22,14 +22,19 @@ public class CardRepository(PostcardDbContext dbContext, ILogger<CardRepository>
         }
     }
 
-    public override async Task<bool> Update(Card entity)
+    public override async Task<bool> Update(Card? entity)
     {
         try
         {
-            var existingCard = await DbSet.FirstOrDefaultAsync(c => c.UserId == entity.UserId);
-            if (existingCard is null) return await Add(entity);
+            if (entity is null)
+            {
+                return await Add(entity);
+            }
+            
+            var existingCard = await DbSet.FirstOrDefaultAsync(c => c != null && c.UserId == entity.UserId);
 
             existingCard = entity;
+            
             return true;
         }
         catch (Exception e)
@@ -39,12 +44,13 @@ public class CardRepository(PostcardDbContext dbContext, ILogger<CardRepository>
         }
     }
 
-    public override async Task<bool> Remove(Card entity)
+    public override async Task<bool> Remove(Card? entity)
     {
         try
         {
-            var existingCard = await DbSet.FirstOrDefaultAsync(c => c.UserId == entity.UserId);
-            if (existingCard is null) return false;
+            if (entity is null) return false;
+          
+            var existingCard = await DbSet.FirstOrDefaultAsync(c => c != null && c.UserId == entity.UserId);
            
             DbSet.Remove(existingCard);
             return true;

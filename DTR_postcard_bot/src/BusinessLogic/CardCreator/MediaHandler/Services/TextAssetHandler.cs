@@ -8,9 +8,12 @@ public class TextAssetHandler(IUnitOfWork unitOfWork, TextContent textContent)
 {
     public async Task<string> PrepareBatch(AssetType assetType)
     {
-        var allRequiredAssets = await unitOfWork.Assets.GetByType(assetType.Type);
+        if (await unitOfWork.Assets.GetByType(assetType.Type) is List<Asset> allRequiredAssets)
+        {
+            return await BuildMessageText(allRequiredAssets);
+        }
 
-        return await BuildMessageText(allRequiredAssets);
+        return string.Empty;
     }
 
     private async Task<string> BuildMessageText(IEnumerable<Asset> assets)

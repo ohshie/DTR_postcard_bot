@@ -44,6 +44,8 @@ public class TextRepository(PostcardDbContext dbContext, ILogger<TextRepository>
         try
         {
             var allTexts = await GetAll();
+            if (allTexts is null) return false;
+           
             await BatchRemove(allTexts);
             
             await dbContext.Database.ExecuteSqlRawAsync("UPDATE sqlite_sequence " +
@@ -59,7 +61,7 @@ public class TextRepository(PostcardDbContext dbContext, ILogger<TextRepository>
         }
     }
 
-    public async Task<bool> BatchRemove(IEnumerable<Text> texts, IEnumerable<Text>? allTexts = null)
+    public async Task<bool> BatchRemove(IEnumerable<Text?> texts, IEnumerable<Text>? allTexts = null)
     {
         try
         {
@@ -68,7 +70,7 @@ public class TextRepository(PostcardDbContext dbContext, ILogger<TextRepository>
                 texts = allTexts.Where(texts.Contains).ToList();
             }
 
-            DbSet.RemoveRange(texts);
+            DbSet.RemoveRange(texts!);
 
             return true;
         }

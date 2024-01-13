@@ -33,11 +33,11 @@ public abstract class CardCreatorBase
             card = await _startCardCreation.Handle(query);
         }
 
-        await Handle(card, query);
+        await Handle(card!, query);
         
         if (NextTask is not null)
         {
-            await NextTask.Handle(card, query);
+            await NextTask.Handle(card!, query);
         }
     }
     

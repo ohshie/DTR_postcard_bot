@@ -10,11 +10,12 @@ public class ButtonCreator(IUnitOfWork unitOfWork)
         List<InlineKeyboardButton> buttons = new();
         
         var availableAssets = await unitOfWork.Assets.GetByType(assetType);
+       
         var counter = 0;
 
         foreach (var asset in availableAssets)
         {
-            if (asset.Type.Type != assetType || !asset.OutputAsset) continue;
+            if (asset!.Type.Type != assetType || !asset.OutputAsset) continue;
             
             ++counter;
             var button = InlineKeyboardButton.WithCallbackData(counter.ToString(), 

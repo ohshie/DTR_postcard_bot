@@ -16,7 +16,7 @@ public class RequestMedia(ILogger<RequestMedia> logger,
     IMediaBatchHandler mediaBatchHandler,
     TextAssetHandler textAssetHandler) : CardCreatorBase (logger, startCardCreation, unitOfWork)
 {
-    private InlineKeyboardMarkup? _keyboardMarkup;
+    private InlineKeyboardMarkup _keyboardMarkup = null!;
     private string _newMessageText = string.Empty;
 
     protected override async Task Handle(Card card, CallbackQuery query)
@@ -51,12 +51,12 @@ public class RequestMedia(ILogger<RequestMedia> logger,
 
     private async Task<AssetType> ProcessRequest(Card card, int messageId)
     {
-        AssetType requestedAssetType;
+        AssetType? requestedAssetType;
         
         if (card.Step == 1)
         {
             requestedAssetType = await unitOfWork.AssetTypes.Get(card.AssetTypeIds.First());
-            
+
             await botMessenger.DeleteMessageAsync(card.UserId, messageId);
             
             _newMessageText = await textContent.GetRequiredText("firstSelectMessage", requestedAssetType.Text);

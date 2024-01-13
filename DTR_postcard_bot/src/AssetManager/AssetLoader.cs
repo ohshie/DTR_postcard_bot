@@ -14,7 +14,7 @@ public class AssetLoader(IUnitOfWork unitOfWork)
     }
 
     private List<Asset> AssembleIntoBatch(JsonDocument jDoc, 
-        AssetType[] assetTypes)
+        AssetType[]? assetTypes)
     {
         List<Asset> assets = new();
         
@@ -22,7 +22,7 @@ public class AssetLoader(IUnitOfWork unitOfWork)
         {
             var asset = new Asset
             {
-                Channel = type.GetProperty("channel").ToString(),
+                Channel = type.GetProperty("channel").ToString(),   
                 Type = assetTypes.FirstOrDefault(at => at.Type == type.GetProperty("type").ToString()),
                 FileName = type.GetProperty("filePath").ToString()
             };
@@ -31,7 +31,7 @@ public class AssetLoader(IUnitOfWork unitOfWork)
             asset.Text = text.ToString();
 
             asset.FileUrl = string.IsNullOrEmpty(type.GetProperty("fileUrl").ToString())
-                ? Helpers.PathBuilder("assets", asset.Type!.Type, asset.FileName)
+                ? Helpers.PathBuilder("assets", asset.Type.Type, asset.FileName)
                 : type.GetProperty("fileUrl").ToString();
 
             asset.OutputAsset = type.GetProperty("outputAsset").GetBoolean();

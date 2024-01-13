@@ -7,5 +7,5 @@ public interface IAssetTypeRepository : IRepository<AssetType>
     Task<AssetType?> Get(int id);
     Task<bool> BatchAdd(IEnumerable<AssetType> assetTypes);
     Task<bool> RemoveAll();
-    Task<bool> BatchRemove(IEnumerable<AssetType> entities, IEnumerable<AssetType>? allAssets = null);
+    Task<bool> BatchRemove(IEnumerable<AssetType?> entities, IEnumerable<AssetType>? allAssets = null);
 }

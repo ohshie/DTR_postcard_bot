@@ -16,6 +16,7 @@ public class UnitOfWork(PostcardDbContext dbContext, ILogger<UnitOfWork> logger,
     
     public async Task CompleteAsync()
     {
+        logger.LogInformation("Saving changes to Db");
         await dbContext.SaveChangesAsync();
     }
 

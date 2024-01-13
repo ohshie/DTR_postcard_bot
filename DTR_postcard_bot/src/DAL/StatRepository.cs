@@ -48,7 +48,7 @@ public class StatRepository(PostcardDbContext dbContext,
         }
     }
 
-    public override async Task<IEnumerable<Stat>> GetAll()
+    public override async Task<IEnumerable<Stat>?> GetAll()
     {
         try
         {
@@ -61,10 +61,12 @@ public class StatRepository(PostcardDbContext dbContext,
         }
     }
     
-    public override async Task<bool> Update(Stat entity)
+    public override async Task<bool> Update(Stat? entity)
     {
         try
         {
+            if (entity is null) return false;
+          
             var existingStat = await DbSet.FirstOrDefaultAsync(c => c.UserId == entity.UserId);
             if (existingStat is null) return await Add(entity);
 
@@ -78,10 +80,12 @@ public class StatRepository(PostcardDbContext dbContext,
         }
     }
     
-    public override async Task<bool> Remove(Stat entity)
+    public override async Task<bool> Remove(Stat? entity)
     {
         try
         {
+            if (entity is null) return false;
+            
             var existingStat = await DbSet.FirstOrDefaultAsync(c => c.UserId == entity.UserId);
             if (existingStat is null) return false;
            

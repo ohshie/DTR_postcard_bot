@@ -7,17 +7,20 @@ public class MediaBatchFromStream(IUnitOfWork unitOfWork) : IMediaBatchHandler
 {
     public async Task<(bool, IEnumerable<InputMediaPhoto>)> PrepareBatch(AssetType assetType)
     {
-        var allRequiredAssets = await unitOfWork.Assets.GetByType(assetType.Type);
-        
-        var requiredAssets = allRequiredAssets as Asset[] ?? allRequiredAssets.ToArray();
-        
-        var inputMediaPhotos = AssembleBatch(requiredAssets!.Where(a => a.DisplayAsset));
+        if (await unitOfWork.Assets.GetByType(assetType.Type) is List<Asset> allRequiredAssets)
+        {
+            var inputMediaPhotos = AssembleBatch(allRequiredAssets.Where(a => a.DisplayAsset));
 
-        var tgFileIdExist = !string.IsNullOrEmpty(requiredAssets!
-            .Select(a => a.TelegramFileId)
-            .FirstOrDefault());
+            var tgFileIdExist = !string.IsNullOrEmpty(allRequiredAssets
+                .Select(a => a.TelegramFileId)
+                .FirstOrDefault());
         
-        return  (tgFileIdExist, inputMediaPhotos);
+            return  (tgFileIdExist, inputMediaPhotos);
+        }
+        else
+        {
+            return (false, new List<InputMediaPhoto>());
+        }
     }
 
     private IEnumerable<InputMediaPhoto> AssembleBatch(IEnumerable<Asset> assets)

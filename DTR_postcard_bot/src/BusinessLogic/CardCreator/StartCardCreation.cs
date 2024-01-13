@@ -8,7 +8,7 @@ public class StartCardCreation(ILogger<StartCardCreation> logger,
     BotMessenger botMessenger,
     IUnitOfWork unitOfWork)
 {
-    public async Task<Card> Handle(CallbackQuery query)
+    public async Task<Card?> Handle(CallbackQuery query)
     {
         if (query.Data == CallbackList.CreateNew)
         {
@@ -18,7 +18,7 @@ public class StartCardCreation(ILogger<StartCardCreation> logger,
         
         logger.LogInformation("Registering new Card creation for UserId {UserId}", query.From.Id);
         
-        var assetTypes = await unitOfWork.AssetTypes.GetAll();
+        var assetTypes = await unitOfWork.AssetTypes.GetAll() ?? new List<AssetType>();
         
         var card = await RegisterNewCard(query, assetTypes);
         
@@ -40,13 +40,18 @@ public class StartCardCreation(ILogger<StartCardCreation> logger,
             Step = 0,
             AssetTypeIds = assetTypes.Select(at => at.Id).ToList()
         };
+
+        await UpdateDb(card, userId, userName);
         
-        var success = await unitOfWork.Cards.Add(card);
-        success = await unitOfWork.Stats.UpdateOrAdd(userId, userName);
+        return card;
+    }
+
+    private async Task UpdateDb(Card card, long userId, string? userName)
+    {
+        await unitOfWork.Cards.Add(card);
+        await unitOfWork.Stats.UpdateOrAdd(userId, userName);
         
         await unitOfWork.CompleteAsync();
-
-        return card;
     }
 
     private async Task OldCardCleanUp(CallbackQuery query)

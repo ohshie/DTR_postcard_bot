@@ -31,7 +31,7 @@ public class AddElementToCard(ILogger<AddElementToCard> logger,
         }
     }
 
-    private async Task UpdateCard(Card card)
+    private async Task UpdateCard(Card? card)
     {
         await unitOfWork.Cards.Update(card);
         await unitOfWork.CompleteAsync();

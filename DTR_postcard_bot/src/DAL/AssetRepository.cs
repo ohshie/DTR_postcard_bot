@@ -9,17 +9,19 @@ namespace DTR_postcard_bot.DAL;
 public class AssetRepository(PostcardDbContext dbContext, ILogger<AssetRepository> logger) 
     : GenericRepository<Asset>(dbContext, logger), IAssetRepository
 {
-    public async Task<IEnumerable<Asset>> GetByType(string requestedType)
+    public async Task<IEnumerable<Asset?>> GetByType(string requestedType)
     {
         try
         {
-            return (await GetAll())
-                .Where(a => a.Type.Type == requestedType).ToList();
+            var allAssets = await GetAll();
+            if (allAssets is null) return new List<Asset>();
+           
+            return allAssets.Where(a => a.Type.Type == requestedType).ToList();
         }
         catch (Exception e)
         {
             logger.LogError("{Exception} while trying to fetch asset related to type {RequestedType} in {Type}", e.InnerException, requestedType, typeof(Asset));
-            return new List<Asset>();
+            return new List<Asset?>();
         }
     }
 
@@ -27,7 +29,10 @@ public class AssetRepository(PostcardDbContext dbContext, ILogger<AssetRepositor
     {
         try
         {
-            var assetsSortedByTypes = (await GetAll())
+            var allAssets = await GetAll();
+            if (allAssets is null) return new List<Asset>();
+        
+            var assetsSortedByTypes = allAssets
                 .Where(a => a.Type.Type == assetType && a.DisplayAsset)
                 .ToList();
             
@@ -66,9 +71,11 @@ public class AssetRepository(PostcardDbContext dbContext, ILogger<AssetRepositor
             var incomingAssets = entities.ToList();
             
             var allAssets = await GetAll();
+            if (allAssets is null) return false;
+
             var matchesAssets = allAssets.Where(incomingAssets.Contains).ToList();
             
-            if (!matchesAssets.Any())
+            if (matchesAssets.Count == 0)
             {
                 return await BatchAdd(incomingAssets);
             }
@@ -89,6 +96,8 @@ public class AssetRepository(PostcardDbContext dbContext, ILogger<AssetRepositor
         try
         {
             var allAssets = await GetAll();
+            if (allAssets is null) return false;
+         
             await BatchRemove(allAssets);
             
             await dbContext.Database.ExecuteSqlRawAsync("UPDATE sqlite_sequence " +
@@ -104,7 +113,7 @@ public class AssetRepository(PostcardDbContext dbContext, ILogger<AssetRepositor
         }
     }
 
-    public async Task<bool> BatchRemove(IEnumerable<Asset> entities, IEnumerable<Asset>? allAssets = null)
+    public async Task<bool> BatchRemove(IEnumerable<Asset?> entities, IEnumerable<Asset>? allAssets = null)
     {
         try
         {
@@ -113,7 +122,7 @@ public class AssetRepository(PostcardDbContext dbContext, ILogger<AssetRepositor
                entities = allAssets.Where(entities.Contains).ToList();
             }
 
-            DbSet.RemoveRange(entities);
+            DbSet.RemoveRange(entities!);
 
             return true;
         }

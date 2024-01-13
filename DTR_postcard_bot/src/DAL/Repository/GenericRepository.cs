@@ -18,37 +18,43 @@ public class GenericRepository<TEntity> : IRepository<TEntity> where TEntity : c
         DbSet = dbContext.Set<TEntity>();
     }
 
-    public virtual async Task<TEntity> Get(long id)
+    public virtual async Task<TEntity?> Get(long id)
     {
         return await DbSet.FindAsync(id);
     }
 
-    public virtual async Task<IEnumerable<TEntity>> GetAll()
+    public virtual async Task<IEnumerable<TEntity>?> GetAll()
     {
         return await DbSet.ToListAsync();
     }
 
-    public virtual async Task<bool> Add(TEntity entity)
+    public virtual async Task<bool> Add(TEntity? entity)
     {
+        if (entity is null) return false;
+        
         await DbSet.AddAsync(entity);
         return true;
     }
 
-    public virtual async Task<bool> Update(TEntity entity)
+    public virtual async Task<bool> Update(TEntity? entity)
     {
+        if (entity is null) return false;
+
         var entry = DbSet.Entry(entity);
         entry.State = EntityState.Modified;
         return true;
     }
     
-    public virtual async Task Remove(object id)
+    public virtual async Task Remove(object? id)
     {
         var entity = await DbSet.FindAsync(id);
         await Remove(entity);
     }
 
-    public virtual async Task<bool> Remove(TEntity entity)
+    public virtual async Task<bool> Remove(TEntity? entity)
     {
+        if (entity is null) return false;
+        
         if (_dbContext.Entry(entity).State is EntityState.Detached)
         {
             DbSet.Attach(entity);

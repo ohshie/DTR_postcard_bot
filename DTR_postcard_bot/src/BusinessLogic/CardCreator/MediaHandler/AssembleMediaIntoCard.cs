@@ -48,14 +48,16 @@ public class AssembleMediaIntoCard(IUnitOfWork unitOfWork)
 
     private async Task ImageManipulation(IEnumerable<Image> images, Card card)
     {
-        const int width = 839;
-        const int height = 595;
+        if (images is not List<Image> imagesList) return;
+
+        var width = imagesList.First().Width;
+        var height = imagesList.First().Height;
 
         using (var canvas = new Image<Rgba32>(width, height))
         {
             canvas.Mutate(x =>
             {
-                foreach (var image in images)
+                foreach (var image in imagesList)
                 {
                     var offsetX = (width - image.Width) / 2;
                     var offsetY = (height - image.Height) / 2;
@@ -74,7 +76,7 @@ public class AssembleMediaIntoCard(IUnitOfWork unitOfWork)
             await canvas.SaveAsync(_pathToCreatedFile);
         }
 
-        foreach (var image in images)
+        foreach (var image in imagesList)
         {
             image.Dispose();
         }
